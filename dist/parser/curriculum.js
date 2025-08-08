@@ -13,7 +13,7 @@ export function parseCurriculum(csvData) {
                 const firstCell = cells[0] ?? "";
                 //Metadata
                 if (firstCell.includes("Rev#")) {
-                    const metaMatch = firstCell.match(/([A-Z]+)\s*-\s*.*:\s*(.*?)\s+Rev#\s*(\d+)/i);
+                    const metaMatch = firstCell.match(/([A-Z0-9]+)\s*-\s*.*:\s*(.*?)\s+Rev#\s*(\d+)/i);
                     if (metaMatch) {
                         curr_id = metaMatch[1]?.trim() ?? "";
                         program_name = metaMatch[2]?.trim() ?? "";
