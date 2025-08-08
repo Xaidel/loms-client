@@ -1,7 +1,8 @@
 import { parseCurriculum } from "../parser/curriculum"
 import Papa from "papaparse"
 import { convertToCSVFile } from "../parser/xls"
-export default async function uploadCurriculum(url: string, xls: File): Promise<Record<string, unknown>> {
+
+export async function uploadCurriculum(url: string, xls: File): Promise<Record<string, unknown>> {
   try {
     const csv = await convertToCSVFile(xls)
     const data = await csv.text()

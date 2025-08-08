@@ -1,17 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseCurriculum = parseCurriculum;
-const papaparse_1 = __importDefault(require("papaparse"));
-function parseCurriculum(csvData) {
+import Papa from "papaparse";
+export function parseCurriculum(csvData) {
     let curr_id = "";
     let program_name = "";
     let revision_no = 0;
     let year_level = null;
     const cleanRows = [];
-    papaparse_1.default.parse(csvData, {
+    Papa.parse(csvData, {
         skipEmptyLines: true,
         complete: (result) => {
             result.data.forEach((row) => {

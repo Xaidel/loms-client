@@ -1,4 +1,4 @@
-import uploadCurriculum from "./relay/curriculum"
+import { uploadCurriculum } from "./relay/curriculum"
 
 export default class Client {
   private BASE_URL: string
