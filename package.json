@@ -1,0 +1,27 @@
+{
+  "name": "currparser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && rollup -c",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "papaparse": "^5.5.3",
+    "rollup-obfuscator": "^4.1.1",
+    "tslib": "^2.8.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/papaparse": "^5.3.16",
+    "rollup": "^4.46.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
