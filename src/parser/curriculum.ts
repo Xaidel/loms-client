@@ -19,7 +19,7 @@ export function parseCurriculum(csvData: string): CleanRow[] {
 
         //Metadata
         if (firstCell.includes("Rev#")) {
-          const metaMatch = firstCell.match(/([A-Z]+)\s*-\s*.*:\s*(.*?)\s+Rev#\s*(\d+)/i);
+          const metaMatch = firstCell.match(/^([A-Z0-9]+)\s*-\s*([A-Z0-9]+):\s*(.*?)\s+Rev#\s*(\d+)/i);
           if (metaMatch) {
             curr_id = metaMatch[1]?.trim() ?? "";
             program_name = metaMatch[2]?.trim() ?? "";
