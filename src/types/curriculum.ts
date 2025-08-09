@@ -1,4 +1,4 @@
-export interface CleanRow {
+export interface CurriculumCourses {
   curr_id: string;
   program_name: string;
   revision_no: number;

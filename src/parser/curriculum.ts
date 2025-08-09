@@ -1,14 +1,14 @@
 import Papa from "papaparse"
-import { CleanRow } from "../types/curriculum";
+import { CurriculumCourses } from "../types/curriculum";
 
-export function parseCurriculum(csvData: string): CleanRow[] {
+export function parseCurriculum(csvData: string): CurriculumCourses[] {
   let curr_id = "";
   let program_name = "";
   let revision_no = 0;
 
   let year_level: number | null = null;
 
-  const cleanRows: CleanRow[] = [];
+  const cleanRows: CurriculumCourses[] = [];
 
   Papa.parse<string[]>(csvData, {
     skipEmptyLines: true,

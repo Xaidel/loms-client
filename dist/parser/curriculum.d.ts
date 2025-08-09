@@ -1,2 +1,2 @@
-import { CleanRow } from "../types/curriculum";
-export declare function parseCurriculum(csvData: string): CleanRow[];
+import { CurriculumCourses } from "../types/curriculum";
+export declare function parseCurriculum(csvData: string): CurriculumCourses[];

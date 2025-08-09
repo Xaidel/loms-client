@@ -1,4 +1,4 @@
-import { uploadCurriculum } from "./relay/curriculum";
+import { uploadCurriculum } from "./relay/uploadCurriculum";
 export default class Client {
     BASE_URL;
     constructor(url) {
