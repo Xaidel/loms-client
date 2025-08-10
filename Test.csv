@@ -1,0 +1,24 @@
+,,,,,
+,,,,,
+,Name of Faculty:,"CASIMERO, DANNY BOY M.",,School Year,2024-2025
+,Course:,BCS222L - WEB DEVELOPMENT II,,Semester,2nd
+,,,,,
+Course Outcome Statement,,,Intended Learning Outcome,Assessment Tool,Performance Target 
+1,"Understands the fundamental concepts and principles that underpin these frameworks, including their core functionalities and architectural components",,Acquire a deep understanding of javascript and Web Development framework,"Objective Type Quiz 
+",At least 70% of enrolled students with a rating of at least 60% of the total score
+,,,Implement JavaScript to manipulate the DOM and handle user interactions dynamically.,Objective Type Programming,At least 70% of enrolled students with a rating of at least 60% of the total score
+,,,"Analyze the principles of user-centered design and apply them to web interfaces
+",Web development Plan/Proposal Presentation,At least 70% of enrolled students with a rating of at least 50% of the total score
+2,Determine the basic concepts and practices in creating Springboot application,,"Determine the different popular web development frameworks
+",Objective Type Quiz ,At least 70% of enrolled students with a rating of at least 60% of the total score
+,,,"Implement single-page applications (SPA)
+","
+Objective Type Programming
+",At least 70% of enrolled students with a rating of at least 60% of the total score
+,,,Develop an application that implements state management within their applications using the features provided by the frontend frameworks.,"
+Objective Type Programming
+",At least 70% of enrolled students with a rating of at least 50% of the total score
+3,Create and implement a dynamic web application using Vuetify and Vuex for UI and state management.,,"Understand the fundamental vue.js framework syntax, constructs, and programming concepts",Objective Type Quiz ,At least 70% of enrolled students with a rating of at least 60% of the total score
+,,,Apply the Model-view-controller pattern in creating the user interface of the web application.,"Objective Type Programming
+",At least 70% of enrolled students with a rating of at least 60% of the total score
+,,,"Implement vue conditional,routing and directives in the web application.",Web Application Project Presentation,At least 70% of enrolled students with a rating of at least 50% of the total score

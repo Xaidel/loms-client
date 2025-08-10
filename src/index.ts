@@ -4,7 +4,7 @@ import path from "path"
 
 const client = new Client('http://localhost:3000/api/v1')
 
-const filePath = path.join(__dirname, "../KR.xls");
+const filePath = path.join(__dirname, "../Test.csv");
 const buffer = fs.readFileSync(filePath)
-const file = new File([buffer], 'KR.xls', { type: 'text/xls' })
-console.log(client.Parser().curriculum(file))
+const file = new File([buffer], 'Test.csv', { type: 'text/csv' })
+console.log(client.Parser().coaep(file))

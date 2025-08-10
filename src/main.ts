@@ -1,5 +1,6 @@
 import { uploadCurriculum } from "./relay/uploadCurriculum"
 import { uploadCourseOffering } from "./relay/uploadCourseOffering"
+import { uploadCOAEP } from "./relay/uploadCOAEP"
 
 export default class Client {
   private BASE_URL: string
@@ -27,6 +28,11 @@ export default class Client {
        */
       courseOffering: async (csv: File): Promise<Record<string, unknown>> => {
         const res = await uploadCourseOffering(this.BASE_URL, csv)
+        return res
+      },
+
+      coaep: async (csv: File) => {
+        const res = await uploadCOAEP(csv)
         return res
       }
     }
