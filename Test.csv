@@ -1,24 +1,21 @@
 ,,,,,
 ,,,,,
-,Name of Faculty:,"CASIMERO, DANNY BOY M.",,School Year,2024-2025
-,Course:,BCS222L - WEB DEVELOPMENT II,,Semester,2nd
+,Name of Faculty:,MCLYN D. RIÑON,,School Year,2024-2025
+,Course:,BCS122L - Intermediate Programming,,Semester,2nd
 ,,,,,
 Course Outcome Statement,,,Intended Learning Outcome,Assessment Tool,Performance Target 
-1,"Understands the fundamental concepts and principles that underpin these frameworks, including their core functionalities and architectural components",,Acquire a deep understanding of javascript and Web Development framework,"Objective Type Quiz 
-",At least 70% of enrolled students with a rating of at least 60% of the total score
-,,,Implement JavaScript to manipulate the DOM and handle user interactions dynamically.,Objective Type Programming,At least 70% of enrolled students with a rating of at least 60% of the total score
-,,,"Analyze the principles of user-centered design and apply them to web interfaces
-",Web development Plan/Proposal Presentation,At least 70% of enrolled students with a rating of at least 50% of the total score
-2,Determine the basic concepts and practices in creating Springboot application,,"Determine the different popular web development frameworks
-",Objective Type Quiz ,At least 70% of enrolled students with a rating of at least 60% of the total score
-,,,"Implement single-page applications (SPA)
-","
-Objective Type Programming
-",At least 70% of enrolled students with a rating of at least 60% of the total score
-,,,Develop an application that implements state management within their applications using the features provided by the frontend frameworks.,"
-Objective Type Programming
-",At least 70% of enrolled students with a rating of at least 50% of the total score
-3,Create and implement a dynamic web application using Vuetify and Vuex for UI and state management.,,"Understand the fundamental vue.js framework syntax, constructs, and programming concepts",Objective Type Quiz ,At least 70% of enrolled students with a rating of at least 60% of the total score
-,,,Apply the Model-view-controller pattern in creating the user interface of the web application.,"Objective Type Programming
-",At least 70% of enrolled students with a rating of at least 60% of the total score
-,,,"Implement vue conditional,routing and directives in the web application.",Web Application Project Presentation,At least 70% of enrolled students with a rating of at least 50% of the total score
+1,Distinguish the basic concepts and principles of Java arrays and how these are implemented using Java.,,ILO1 Identify the fundamental concepts and functions related to Java arrays.,"Quiz, Discussion Board",At least 80% of enrolled students with attain a score of at least 75%
+,,,ILO2 Exhibit competency in manipulating arrays in Java.,Programming Exercises,At least 80% of enrolled students with attain a score of at least 75%
+,,,ILO3 Differentiate the various types of arrays in Java according to their structure and application.,"Quiz, Programming Exercises",At least 80% of enrolled students with attain a score of at least 75%
+2,Understand the foundational concepts and principles of string manipulation in Java.,,"ILO4 Describe the declaration, initialization and concatenation of strings in Java.","Quiz, Programming Exercises",At least 80% of enrolled students with attain a score of at least 75%
+,,,ILO5 Apply various string methods supported in Java.,"Quiz, Programming Exercises",At least 80% of enrolled students with attain a score of at least 75%
+,,,ILO6 Explain the relation between strings and numerical values.,"Quiz, Discussion Board",At least 80% of enrolled students with attain a score of at least 75%
+3,Develop robust Java programs that incorporate effective file manipulation and proactive error-handling mechanisms.,,"ILO7 Gain a foundational understanding of file handling concepts in Java, focusing on file types and their importance in software development.","Quiz, Discussion Board",At least 80% of enrolled students with attain a score of at least 75%
+,,,"ILO8 Develop a Java program that creates new files and write data to them, demonstrating proficiency in utilizing Java's file handling APIs.",Programming Exercises,At least 80% of enrolled students with attain a score of at least 75%
+,,,"ILO9 Construct a Java program that facilitates reading from and manipulating file content, as well as deleting files.",Programming Exercises,At least 80% of enrolled students with attain a score of at least 75%
+4,Build a Java program that supports proactive error-handling mechanisms.,,ILO10 Describe the different types of exceptions in Java.,"Quiz, Discussion Board",At least 80% of enrolled students with attain a score of at least 75%
+,,,ILO11 Recognize the keywords associated with Java exceptions.,"Quiz, Discussion Board",At least 80% of enrolled students with attain a score of at least 75%
+,,,ILO12 Develop a Java program with proper error-handling functionalities. ,Programming Exercises,At least 80% of enrolled students with attain a score of at least 75%
+5,Implement Java methods for modular programming.,,ILO13 Apply the concepts of methods in Java programming.,"Quiz, Programming Exercises",At least 80% of enrolled students with attain a score of at least 75%
+,,,"ILO14 Recognize the role of method parameters, as well as differentiate static methods and instance methods.","Quiz, Programming Exercises",At least 80% of enrolled students with attain a score of at least 75%
+,,,"ILO15 Implement the concepts of method overloading, scope and recursion.","Quiz, Programming Exercises",At least 80% of enrolled students with attain a score of at least 75%

@@ -27,7 +27,6 @@ export function parseCOAEP(csvString: string) {
     }
     if (row[1]?.includes("Course:")) {
       const courseStr = row[2]?.trim() || "";
-      // keep full title, not just code
       data.COAEP.course = courseStr || null;
     }
     if (row.includes("Semester")) {
@@ -74,7 +73,6 @@ export function parseCOAEP(csvString: string) {
     }
   });
 
-  // Push the last CO
   if (currentCO) {
     data.COAEP.co.push(currentCO);
   }
