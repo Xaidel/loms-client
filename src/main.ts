@@ -32,7 +32,7 @@ export default class Client {
       },
 
       coaep: async (csv: File) => {
-        const res = await uploadCOAEP(csv)
+        const res = await uploadCOAEP(this.BASE_URL, csv)
         return res
       }
     }
