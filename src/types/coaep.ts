@@ -1,5 +1,6 @@
 export interface ILO {
   statement: string;
+  verb: string;
   assessment_tool: string;
   performance_target: number | null;
   passing_score: number | null;
@@ -7,6 +8,7 @@ export interface ILO {
 
 export interface CO {
   statement: string;
+  verb: string;
   ilo: ILO[];
 }
 

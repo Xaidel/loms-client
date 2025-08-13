@@ -48,8 +48,11 @@ export function parseCOAEP(csvString: string) {
       if (currentCO) {
         data.COAEP.co.push(currentCO);
       }
+      const stmt = col1
+      const verb = stmt.trim().split(/\s+/)[0] ?? "";
       currentCO = {
-        statement: col1,
+        statement: stmt,
+        verb: verb,
         ilo: []
       };
     }
@@ -64,8 +67,10 @@ export function parseCOAEP(csvString: string) {
       const perfTargetStr = (row[5]?.replace(/\s+/g, " ").trim()) || "";
 
       const { performance_target, passing_score } = performaceTarget(perfTargetStr)
+
       currentCO.ilo.push({
         statement: iloStatement,
+        verb: iloStatement.split(/\s+/)[0] ?? "",
         assessment_tool: assessmentTool,
         performance_target,
         passing_score
