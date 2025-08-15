@@ -1,6 +1,7 @@
 import { uploadCurriculum } from "./relay/uploadCurriculum"
 import { uploadCourseOffering } from "./relay/uploadCourseOffering"
 import { uploadCOAEP } from "./relay/uploadCOAEP"
+import { uploadEnrolledStudent } from "./relay/uploadEnrolledStudent"
 
 export default class Client {
   private BASE_URL: string
@@ -16,8 +17,8 @@ export default class Client {
        * @param curriculum file from registrar
        * @returns status 201
        */
-      curriculum: async (csv: File): Promise<Record<string, unknown>> => {
-        const res = await uploadCurriculum(this.BASE_URL, csv)
+      curriculum: async (xls: File): Promise<Record<string, unknown>> => {
+        const res = await uploadCurriculum(this.BASE_URL, xls)
         return res
       },
 
@@ -26,13 +27,18 @@ export default class Client {
        * @param offering file from registrar
        * @returns status 201
        */
-      courseOffering: async (csv: File): Promise<Record<string, unknown>> => {
-        const res = await uploadCourseOffering(this.BASE_URL, csv)
+      courseOffering: async (xls: File): Promise<Record<string, unknown>> => {
+        const res = await uploadCourseOffering(this.BASE_URL, xls)
         return res
       },
 
-      coaep: async (csv: File) => {
-        const res = await uploadCOAEP(this.BASE_URL, csv)
+      coaep: async (xls: File) => {
+        const res = await uploadCOAEP(this.BASE_URL, xls)
+        return res
+      },
+
+      enrolledStudent: async (xls: File) => {
+        const res = await uploadEnrolledStudent(this.BASE_URL, xls)
         return res
       }
     }
