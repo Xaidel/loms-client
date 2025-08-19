@@ -2,6 +2,7 @@ import { uploadCurriculum } from "./relay/uploadCurriculum"
 import { uploadCourseOffering } from "./relay/uploadCourseOffering"
 import { uploadCOAEP } from "./relay/uploadCOAEP"
 import { uploadEnrolledStudent } from "./relay/uploadEnrolledStudent"
+import { uploadClassList } from "./relay/uploadClassList"
 
 export default class Client {
   private BASE_URL: string
@@ -40,7 +41,12 @@ export default class Client {
       enrolledStudent: async (xls: File) => {
         const res = await uploadEnrolledStudent(this.BASE_URL, xls)
         return res
-      }
+      },
+
+      classlist: async (xls: File) => {
+        const res = await uploadClassList(this.BASE_URL, xls)
+        return res
+      },
     }
   }
 }
