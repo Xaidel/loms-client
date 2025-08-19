@@ -1,13 +1,17 @@
 {
-  "name": "currparser",
+  "name": "@xaidel/coms-parser",
   "version": "1.0.6",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist && tsc && rollup -c",
     "build:w": "rmdir /s /q dist 2>nul || echo \"Directory not found\" && tsc && rollup -c",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
   },
+  "files": [
+    "dist/"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
