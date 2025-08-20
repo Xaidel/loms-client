@@ -1,17 +1,14 @@
 {
   "name": "@xaidel/coms-parser",
-  "version": "1.0.7",
-  "main": "dist/index.js",
+  "version": "1.0.5",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist && tsc && rollup -c",
     "build:w": "rmdir /s /q dist 2>nul || echo \"Directory not found\" && tsc && rollup -c",
     "start": "node dist/index.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build:w && node build.js"
   },
-  "files": [
-    "dist/"
-  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
