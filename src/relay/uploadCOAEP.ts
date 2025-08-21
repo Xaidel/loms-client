@@ -3,8 +3,8 @@ import { convertToCSVFile } from "../parser/xls"
 
 export async function uploadCOAEP(url: string, xls: File) {
   try {
-    //  const csv = await convertToCSVFile(xls)
-    const data = await xls.text()
+    const csv = await convertToCSVFile(xls)
+    const data = await csv.text()
     const parsed = parseCOAEP(data)
 
     const res = await fetch(`${url}/coaeps/upload`, {

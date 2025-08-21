@@ -4,9 +4,9 @@ import path from "path"
 
 const client = new Client('http://localhost:3000/api/v1')
 
-const filePath = path.join(__dirname, "../Test.xlsx");
+const filePath = path.join(__dirname, "../Test.csv");
 const buffer = fs.readFileSync(filePath)
-const file = new File([buffer], 'Test.xlsx', { type: 'text/csv' })
-client.Parser().enrolledStudent(file)
+const file = new File([buffer], 'Test.csv', { type: 'text/csv' })
+client.Parser().classlist(file)
   .then(result => console.log(result))
   .catch(err => console.error("Error uploading COAEP:", err))
