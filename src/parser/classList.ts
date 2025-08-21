@@ -1,7 +1,11 @@
 import Papa from "papaparse"
 import { classList } from "../types/classList"
 
-export function parseClassList(csvData: string): classList[] {
+type ClassListResponse = {
+    enrolledCourses: classList[]
+}
+
+export function parseClassList(csvData: string): ClassListResponse {
     const rows: string[][] = Papa.parse<string[]>(csvData, {
         skipEmptyLines: true,
     }).data as string[][]
@@ -41,5 +45,7 @@ export function parseClassList(csvData: string): classList[] {
         }
     })
 
-    return enrolledCourses
+    return {
+        enrolledCourses
+    }
 }
