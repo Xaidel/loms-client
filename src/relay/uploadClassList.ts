@@ -4,7 +4,7 @@ export async function uploadClassList(url: string, xls: File) {
     try {
         const data = await xls.text();
         const parsed = parseClassList(data)
-
+        console.log(JSON.stringify(parsed))
         const res = await fetch(`${url}/enrolled-courses/upload`, {
             method: "POST",
             headers: {

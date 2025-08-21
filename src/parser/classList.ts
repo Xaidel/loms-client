@@ -2,56 +2,44 @@ import Papa from "papaparse"
 import { classList } from "../types/classList"
 
 export function parseClassList(csvData: string): classList[] {
-    let curr_id: string = ""
+    const rows: string[][] = Papa.parse<string[]>(csvData, {
+        skipEmptyLines: true,
+    }).data as string[][]
+
+    let section: string = ""
     let course_id: string = ""
     let subj_code: string = ""
-    let faculty: string = ""
 
-    const cleanRows: classList[] = []
+    const enrolledCourses: classList[] = []
 
-    Papa.parse<string[]>(csvData, {
-        skipEmptyLines: true,
-        complete: (result) => {
-            result.data.forEach((row) => {
-                const cells = row.map((c) => (c ?? "").toString().trim())
-                const firstCell = cells[0] ?? ""
+    rows.forEach((row) => {
+        const cells = row.map((c) => (c ?? "").toString().trim())
+        const firstCell = cells[0] ?? ""
 
-                if (firstCell.startsWith("Course No:")) {
-                    // "Course No: 3093 BIT324L-OBa"
-                    const courseLine = firstCell.replace("Course No:", "").trim()
-                    const parts = courseLine.split(/\s+/)
+        if (firstCell.startsWith("Course No:")) {
+            // "Course No: 3093 BIT324L-OBa"
+            const courseLine = firstCell.replace("Course No:", "").trim()
+            const parts = courseLine.split(/\s+/)
 
-                    subj_code = parts[0] ?? "" // 3093
-                    // BIT999L-OBa split by "-"
-                    const [course, section] = (parts[1] ?? "").split("-")
-                    course_id = course ?? "" // BIT999L
+            subj_code = parts[0] ?? "" // 3093
+            const [course, sec] = (parts[1] ?? "").split("-")
+            course_id = course ?? ""   // BIT999L
 
-                    // OB from OBa (remove last character if it's a letter section)
-                    curr_id = (section ?? "").replace(/[a-zA-Z]$/, "")
-                }
+            const sectionMatch = (sec ?? "").match(/[a-z]$/)
+            section = sectionMatch ? sectionMatch[0] : ""
+        }
 
-                // Extract faculty
-                if (firstCell.startsWith("Teacher:")) {
-                    faculty = firstCell.replace("Teacher:", "").trim()
-                }
+        if (/^\d+$/.test(firstCell)) {
+            const student_no: string = cells[2] ?? ""
 
-                // Extract student rows
-                if (/^\d+$/.test(firstCell)) {
-                    const dept_id: string = cells[1] ?? ""
-                    const student_no: string = cells[2] ?? ""
-
-                    cleanRows.push({
-                        curr_id,
-                        subj_code,
-                        course_id,
-                        faculty,
-                        dept_id,
-                        student_no,
-                    })
-                }
+            enrolledCourses.push({
+                subj_code,
+                student_no,
+                course_id,
+                section,
             })
-        },
+        }
     })
 
-    return cleanRows
+    return enrolledCourses
 }
