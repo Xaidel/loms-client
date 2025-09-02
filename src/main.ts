@@ -3,6 +3,7 @@ import { uploadCourseOffering } from "./relay/uploadCourseOffering"
 import { uploadCOAEP } from "./relay/uploadCOAEP"
 import { uploadEnrolledStudent } from "./relay/uploadEnrolledStudent"
 import { uploadClassList } from "./relay/uploadClassList"
+import { uploadAssessmentData } from "./relay/uploadAssessmentData"
 
 export default class Client {
   private BASE_URL: string
@@ -33,8 +34,8 @@ export default class Client {
         return res
       },
 
-      coaep: async (xls: File) => {
-        const res = await uploadCOAEP(this.BASE_URL, xls)
+      coaep: async (xls: File, course_id: string) => {
+        const res = await uploadCOAEP(this.BASE_URL, xls, course_id)
         return res
       },
 
@@ -47,6 +48,11 @@ export default class Client {
         const res = await uploadClassList(this.BASE_URL, xls)
         return res
       },
+
+      assessmentData: async (xls: File) => {
+        const res = await uploadAssessmentData(this.BASE_URL, xls)
+        return res
+      }
     }
   }
 }
