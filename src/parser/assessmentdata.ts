@@ -12,26 +12,28 @@ export function parseAssessmentCsv(csv: string): { assessmentData: AssessmentDat
   const { data } = Papa.parse<string[]>(csv, { skipEmptyLines: true })
   const rows = (data as string[][]).filter(r => r.length > 0)
 
+  function extractValueAfterLabel(row: string[], label: string): string | undefined {
+    const index = row.findIndex(cell => cell?.trim() === label)
+    return index !== -1 ? row[index + 2]?.trim().replace(/"/g, "") : undefined
+  }
+
   //metadata
-  const facultyRow = rows.find(r => r.some(c => c?.includes("Faculty")))
-  const faculty = facultyRow && facultyRow[2] ? facultyRow[2].replace(/"/g, "").trim() : ""
+  const courseSection = extractValueAfterLabel(rows.find(r => r.includes("Course & Sec")) || [], "Course & Sec") || ""
+  const faculty = extractValueAfterLabel(rows.find(r => r.includes("Faculty")) || [], "Faculty") || ""
+  const semesterStr = extractValueAfterLabel(rows.find(r => r.includes("Semester")) || [], "Semester")
+  const semester = semesterStr?.toLowerCase().includes("1st") ? 1 : semesterStr?.toLowerCase().includes("2nd") ? 2 : 0
 
-  const semRow = rows.find(r => r.some(c => c?.includes("Semester")))
-  const semesterStr = semRow ? semRow[semRow.length - 1] : undefined
-  const semester = semesterStr ? parseInt(semesterStr, 10) : 0
+  const syStr: string = extractValueAfterLabel(rows.find(r => r.includes("School Year")) || [], "School Year") || ""
+  const sy = syStr.includes("-") ? parseInt(syStr.split("-")[0]!) : 0
 
-  const syRow = rows.find(r => r.some(c => c?.includes("School Year")))
-  const syStr = syRow ? syRow[syRow.length - 1]?.trim() ?? "" : ""
-  const sy = syStr ? parseInt(syStr.replace("-", "").slice(2, 6)) : 0
-
-  const courseRow = rows.find(r => r.some(c => c?.includes("Course & Section")))
-  const courseSection = courseRow ? courseRow[courseRow.length - 1]?.trim() ?? "" : ""
+  const course = courseSection.split(/\s+/)[0] || ""
+  const section = course ? course.charAt(course.length - 1) : ""
 
   const classAssignment: ClassAssignment = {
     faculty,
-    Course: courseSection,
-    Section: courseSection,
-    Semester: semester,
+    course: course,
+    section: section,
+    semester: semester,
     sy
   }
 
