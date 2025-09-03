@@ -12,38 +12,62 @@ export function parseAssessmentCsv(csv: string): { assessmentData: AssessmentDat
   const { data } = Papa.parse<string[]>(csv, { skipEmptyLines: true })
   const rows = (data as string[][]).filter(r => r.length > 0)
 
-  //metadata
   const facultyRow = rows.find(r => r.some(c => c?.includes("Faculty")))
-  const faculty = facultyRow && facultyRow[2] ? facultyRow[2].replace(/"/g, "").trim() : ""
+  const facultyIdx = facultyRow ? facultyRow.findIndex(c => c?.includes("Faculty")) : -1
+  const faculty = facultyIdx !== -1 && facultyRow
+    ? facultyRow[facultyIdx + 2]?.replace(/"/g, "").trim() ?? ""
+    : ""
 
   const semRow = rows.find(r => r.some(c => c?.includes("Semester")))
-  const semesterStr = semRow ? semRow[semRow.length - 1] : undefined
-  const semester = semesterStr ? parseInt(semesterStr, 10) : 0
+  const semIdx = semRow ? semRow.findIndex(c => c?.includes("Semester")) : -1
+  const semesterStr = semIdx !== -1 && semRow ? semRow[semIdx + 2]?.trim() ?? "" : ""
+  const semester = semesterStr.includes("1st") ? 1 : semesterStr.includes("2nd") ? 2 : 0
+
+  const courseRow = rows.find(r => r.some(c => c?.includes("Course & Sec")))
+  const courseIdx = courseRow ? courseRow.findIndex(c => c?.includes("Course & Sec")) : -1
+  const rawCourseSection = courseIdx !== -1 && courseRow
+    ? courseRow[courseIdx + 2]?.trim() ?? ""
+    : ""
+
+  let courseCode = ""
+  let section = ""
+  if (rawCourseSection) {
+    const match = rawCourseSection.match(/^([A-Za-z0-9]+)-?([A-Za-z]+)?/)
+    if (match) {
+      courseCode = match[1] ?? ""
+      if (match[2]) {
+        section = match[2].replace(/^OC/i, "")
+      }
+    }
+  }
 
   const syRow = rows.find(r => r.some(c => c?.includes("School Year")))
-  const syStr = syRow ? syRow[syRow.length - 1]?.trim() ?? "" : ""
-  const sy = syStr ? parseInt(syStr.replace("-", "").slice(2, 6)) : 0
+  const syIdx = syRow ? syRow.findIndex(c => c?.includes("School Year")) : -1
+  const syStr = syIdx !== -1 && syRow ? syRow[syIdx + 2]?.trim() ?? "" : ""
 
-  const courseRow = rows.find(r => r.some(c => c?.includes("Course & Section")))
-  const courseSection = courseRow ? courseRow[courseRow.length - 1]?.trim() ?? "" : ""
+  let sy = 0
+  if (syStr) {
+    const match = syStr.match(/(\d{4})-(\d{4})/)
+    if (match) {
+      const first = (match[1] ?? "").slice(2)
+      const second = (match[2] ?? "").slice(2)
+      sy = parseInt(first + second, 10)
+    }
+  }
 
   const classAssignment: ClassAssignment = {
     faculty,
-    Course: courseSection,
-    Section: courseSection,
+    Course: courseCode,
+    Section: section,
     Semester: semester,
     sy
   }
 
   const coRowIndex = rows.findIndex(r => r.some(c => c?.trim() === "CO #"))
-  if (coRowIndex === -1) {
-    throw new Error("CO header row not found in CSV")
-  }
+  if (coRowIndex === -1) throw new Error("CO header row not found in CSV")
 
   const iloRow = rows[coRowIndex + 1]
-  if (!iloRow) {
-    throw new Error("ILO header row not found in CSV")
-  }
+  if (!iloRow) throw new Error("ILO header row not found in CSV")
 
   const iloGroups: Record<string, string[]> = {}
   let coCounter = 1
@@ -63,23 +87,17 @@ export function parseAssessmentCsv(csv: string): { assessmentData: AssessmentDat
   }
 
   const studentHeaderIndex = rows.findIndex(r => r.includes("Name of Students"))
-  if (studentHeaderIndex === -1) {
-    throw new Error("Student header row not found in CSV")
-  }
+  if (studentHeaderIndex === -1) throw new Error("Student header row not found in CSV")
 
   const headerRow = rows[studentHeaderIndex]
-  if (!headerRow) {
-    throw new Error("Student header row is missing")
-  }
+  if (!headerRow) throw new Error("Student header row is missing")
 
   const nameColIndex = headerRow.findIndex(c => c?.includes("Name of Students"))
-  if (nameColIndex === -1) {
-    throw new Error("Name of Students column not found in CSV")
-  }
+  if (nameColIndex === -1) throw new Error("Name of Students column not found in CSV")
 
   const firstScoreColIndex = nameColIndex + 2
-
   const students: Student[] = []
+
   for (let i = studentHeaderIndex + 1; i < rows.length; i++) {
     const row = rows[i]
     if (!row) continue
