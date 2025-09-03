@@ -57,9 +57,9 @@ export function parseAssessmentCsv(csv: string): { assessmentData: AssessmentDat
 
   const classAssignment: ClassAssignment = {
     faculty,
-    Course: courseCode,
-    Section: section,
-    Semester: semester,
+    course: courseCode,
+    section: section,
+    semester: semester,
     sy
   }
 

@@ -8,9 +8,9 @@ export type Student = {
 
 export type ClassAssignment = {
   faculty: string
-  Course: string
-  Section: string
-  Semester: number
+  course: string
+  section: string
+  semester: number
   sy: number
 }
 
