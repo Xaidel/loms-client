@@ -3,3 +3,6 @@ dist/
 build/
 KR.xls/
 KT.csv/
+
+# Ignore local files
+*.local.*
