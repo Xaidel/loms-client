@@ -26,6 +26,8 @@ export function convertToCSVFile(xls: File): Promise<File> {
           return;
         }
 
+        // Convert the worksheet to a CSV string
+        // Removes empty columns
         const csvString = XLSX.utils.sheet_to_csv(workSheet, { strip: true });
 
         // Create a new File from the CSV string
