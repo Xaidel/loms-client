@@ -26,7 +26,7 @@ export function convertToCSVFile(xls: File): Promise<File> {
           return;
         }
 
-        const csvString = XLSX.utils.sheet_to_csv(workSheet);
+        const csvString = XLSX.utils.sheet_to_csv(workSheet, { strip: true });
 
         // Create a new File from the CSV string
         // Use the original filename but replace extension with .csv
