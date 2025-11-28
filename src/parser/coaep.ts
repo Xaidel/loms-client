@@ -60,7 +60,7 @@ export function parseCOAEP(csvString: string) {
 
   rows.forEach((row) => {
     const coNum = row[1]?.trim() || ""; // coIdx is the CO Number
-    const coState = row[2 + 1]?.trim() || ""; // coIdx is the CO Statement
+    const coState = row[2]?.trim() || ""; // coIdx is the CO Statement
     const iloState = row[4]?.trim() || ""; // iloIdx is the ILO Statement
     const assessmentTool = row[5]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
     const perfTargetStr = row[6]?.replace(/\s+/g, " ").trim() || "";
