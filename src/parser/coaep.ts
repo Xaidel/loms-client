@@ -18,10 +18,10 @@ export function parseCOAEP(csvString: string) {
     },
   };
 
-  let coIdx = 0;
-  let iloIdx = 0;
-  let assessToolIdx = 0;
-  let perfTargetIdx = 0;
+  let coIdx = -1;
+  let iloIdx = -1;
+  let assessToolIdx = -1;
+  let perfTargetIdx = -1;
 
   // Get index in row of every header
   rows.forEach((row) => {
@@ -29,6 +29,15 @@ export function parseCOAEP(csvString: string) {
     iloIdx = row.indexOf("Intended Learning Outcome");
     assessToolIdx = row.indexOf("Assessment Tool");
     perfTargetIdx = row.indexOf("Performance Target");
+
+    if (
+      coIdx !== -1 &&
+      iloIdx !== -1 &&
+      assessToolIdx !== -1 &&
+      perfTargetIdx !== -1
+    ) {
+      return;
+    }
   });
 
   // Get Faculty, School Year, Course, Semester info from the file
@@ -53,6 +62,19 @@ export function parseCOAEP(csvString: string) {
     const coNum = row[coIdx]?.trim() || ""; // coIdx is the CO Number
     const coState = row[coIdx + 1]?.trim() || ""; // coIdx is the CO Statement
     const iloState = row[iloIdx]?.trim() || ""; // iloIdx is the ILO Statement
+    const assessmentTool =
+      row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
+    const perfTargetStr = row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
+
+    if (
+      coNum === "" &&
+      coState === "" &&
+      iloState === "" &&
+      assessmentTool === "" &&
+      perfTargetStr === ""
+    ) {
+      return;
+    }
 
     if (coNum && /^\d+$/.test(coNum)) {
       if (currentCO) {
@@ -70,11 +92,6 @@ export function parseCOAEP(csvString: string) {
     if (currentCO && iloState) {
       const iloStatement = iloState.replace(/^ILO\d+[:.]?\s*/, "");
 
-      const assessmentTool =
-        row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
-      const perfTargetStr =
-        row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
-
       const { performance_target, passing_score } =
         performaceTarget(perfTargetStr);
 
@@ -85,11 +102,6 @@ export function parseCOAEP(csvString: string) {
         performance_target,
         passing_score,
       });
-    }
-
-    if (row.every((cell) => cell.trim() === "")) {
-      // Stop processing further rows if all cells are empty
-      return;
     }
   });
 
