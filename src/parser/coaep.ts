@@ -59,12 +59,11 @@ export function parseCOAEP(csvString: string) {
   let currentCO: CO | null = null;
 
   rows.forEach((row) => {
-    const coNum = row[coIdx]?.trim() || ""; // coIdx is the CO Number
-    const coState = row[coIdx + 1]?.trim() || ""; // coIdx is the CO Statement
-    const iloState = row[iloIdx]?.trim() || ""; // iloIdx is the ILO Statement
-    const assessmentTool =
-      row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
-    const perfTargetStr = row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
+    const coNum = row[1]?.trim() || ""; // coIdx is the CO Number
+    const coState = row[2 + 1]?.trim() || ""; // coIdx is the CO Statement
+    const iloState = row[4]?.trim() || ""; // iloIdx is the ILO Statement
+    const assessmentTool = row[5]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
+    const perfTargetStr = row[6]?.replace(/\s+/g, " ").trim() || "";
 
     if (
       coNum === "" &&
