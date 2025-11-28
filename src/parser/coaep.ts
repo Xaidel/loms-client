@@ -1,10 +1,11 @@
 import Papa from "papaparse";
 import { CO, COAEP } from "../types/coaep";
-import { performaceTarget } from "../helper/matchTarget";
+import { performaceTarget } from "../helper/performaceTarget.helper";
+import extractInstructionalVerb from "../helper/extractInstructionalVerb.helper";
 
 export function parseCOAEP(csvString: string) {
   const rows: string[][] = Papa.parse<string[]>(csvString, {
-    skipEmptyLines: false
+    skipEmptyLines: false,
   }).data as string[][];
 
   const data: { COAEP: COAEP } = {
@@ -13,68 +14,82 @@ export function parseCOAEP(csvString: string) {
       course: null,
       sy: null,
       semester: null,
-      co: []
-    }
+      co: [],
+    },
   };
 
-  rows.forEach(row => {
-    if (row[1]?.includes("Name of Faculty:")) {
-      data.COAEP.faculty = row[2]?.trim() || null;
-    }
-    if (row.includes("School Year")) {
-      const idx = row.indexOf("School Year");
-      data.COAEP.sy = row[idx + 1]?.trim() || null;
-    }
-    if (row[1]?.includes("Course:")) {
-      const courseStr = row[2]?.trim() || "";
-      data.COAEP.course = courseStr || null;
-    }
-    if (row.includes("Semester")) {
-      const idx = row.indexOf("Semester");
-      const semStr = row[idx + 1]?.trim() || "";
-      const semNum = semStr.match(/\d+/)?.[0];
-      data.COAEP.semester = semNum ? parseInt(semNum, 10) : null;
-    }
+  let coIdx = 0;
+  let iloIdx = 0;
+  let assessToolIdx = 0;
+  let perfTargetIdx = 0;
+
+  // Get index in row of every header
+  rows.forEach((row) => {
+    coIdx = row.indexOf("Course Outcome Statement");
+    iloIdx = row.indexOf("Intended Learning Outcome");
+    assessToolIdx = row.indexOf("Assessment Tool");
+    perfTargetIdx = row.indexOf("Performance Target");
+  });
+
+  // Get Faculty, School Year, Course, Semester info from the file
+  rows.forEach((row) => {
+    const facName = row.indexOf("Name of Faculty:");
+    const schoolYear = row.indexOf("School Year");
+    const courseIdx = row.indexOf("Course:");
+    const semesterIdx = row.indexOf("Semester");
+
+    data.COAEP.faculty = row[facName + 1]?.trim() || data.COAEP.faculty;
+    data.COAEP.sy = row[schoolYear + 1]?.trim() || data.COAEP.sy;
+    data.COAEP.course = row[courseIdx + 1]?.trim() || data.COAEP.course;
+
+    const semStr = row[semesterIdx + 1]?.trim() || "";
+    const semNum = semStr.match(/\d+/)?.[0];
+    data.COAEP.semester = semNum ? parseInt(semNum, 10) : data.COAEP.semester;
   });
 
   let currentCO: CO | null = null;
 
-  rows.forEach(row => {
-    const col0 = row[0]?.trim() || "";
-    const col1 = row[1]?.trim() || "";
-    const col3 = row[3]?.trim() || "";
+  rows.forEach((row) => {
+    const coNum = row[coIdx]?.trim() || ""; // coIdx is the CO Number
+    const coState = row[coIdx + 1]?.trim() || ""; // coIdx is the CO Statement
+    const iloState = row[iloIdx]?.trim() || ""; // iloIdx is the ILO Statement
 
-    if (col0 && /^\d+$/.test(col0)) {
+    if (coNum && /^\d+$/.test(coNum)) {
       if (currentCO) {
         data.COAEP.co.push(currentCO);
       }
-      const stmt = col1
-      const verb = stmt.trim().split(/\s+/)[0] ?? "";
+      const stmt = coState;
+      const verb = extractInstructionalVerb(stmt) || "";
       currentCO = {
         statement: stmt,
         verb: verb,
-        ilo: []
+        ilo: [],
       };
     }
 
-    if (currentCO && col3) {
-      const iloStatement = col3
-        .replace(/^ILO\d+\s*/, "")
-        .replace(/\s+/g, " ")
-        .trim();
+    if (currentCO && iloState) {
+      const iloStatement = iloState.replace(/^ILO\d+[:.]?\s*/, "");
 
-      const assessmentTool = (row[4]?.replace(/\s+/g, " ").trim()) || "";
-      const perfTargetStr = (row[5]?.replace(/\s+/g, " ").trim()) || "";
+      const assessmentTool =
+        row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
+      const perfTargetStr =
+        row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
 
-      const { performance_target, passing_score } = performaceTarget(perfTargetStr)
+      const { performance_target, passing_score } =
+        performaceTarget(perfTargetStr);
 
       currentCO.ilo.push({
         statement: iloStatement,
-        verb: iloStatement.split(/\s+/)[0] ?? "",
+        verb: extractInstructionalVerb(iloStatement) || "",
         assessment_tool: assessmentTool,
         performance_target,
-        passing_score
+        passing_score,
       });
+    }
+
+    if (row.every((cell) => cell.trim() === "")) {
+      // Stop processing further rows if all cells are empty
+      return;
     }
   });
 
