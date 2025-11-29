@@ -65,16 +65,6 @@ export function parseCOAEP(csvString: string) {
     const assessmentTool = row[5]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
     const perfTargetStr = row[6]?.replace(/\s+/g, " ").trim() || "";
 
-    if (
-      coNum === "" &&
-      coState === "" &&
-      iloState === "" &&
-      assessmentTool === "" &&
-      perfTargetStr === ""
-    ) {
-      return;
-    }
-
     if (coNum && /^\d+$/.test(coNum)) {
       if (currentCO) {
         data.COAEP.co.push(currentCO);
@@ -88,7 +78,7 @@ export function parseCOAEP(csvString: string) {
       };
     }
 
-    if (currentCO && iloState) {
+    if (currentCO && iloState && assessmentTool && perfTargetStr) {
       const iloStatement = iloState.replace(/^ILO\d+[:.]?\s*/, "");
 
       const { performance_target, passing_score } =
