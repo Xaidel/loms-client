@@ -2,6 +2,7 @@ import Papa from "papaparse";
 import { CO, COAEP } from "../types/coaep";
 import { performaceTarget } from "../helper/performaceTarget.helper";
 import extractInstructionalVerb from "../helper/extractInstructionalVerb.helper";
+import getCoaepHeader from "../helper/header-getter/getCoaepHeader";
 
 export function parseCOAEP(csvString: string) {
   const rows: string[][] = Papa.parse<string[]>(csvString, {
@@ -18,18 +19,17 @@ export function parseCOAEP(csvString: string) {
     },
   };
 
-  let coIdx = 0;
-  let iloIdx = 0;
-  let assessToolIdx = 0;
-  let perfTargetIdx = 0;
+  // DYNAMICALLY FIND HEADERS
+  const { headerRowIndex, coIdx, iloIdx, assessToolIdx, perfTargetIdx } =
+    getCoaepHeader(rows);
 
-  // Get index in row of every header
-  rows.forEach((row) => {
-    coIdx = row.indexOf("Course Outcome Statement");
-    iloIdx = row.indexOf("Intended Learning Outcome");
-    assessToolIdx = row.indexOf("Assessment Tool");
-    perfTargetIdx = row.indexOf("Performance Target");
-  });
+  // Validation: If headers aren't found, you might want to throw an error or use defaults
+  if (headerRowIndex === -1) {
+    return {
+      error: "Could not auto-detect header row.",
+      message: "Please ensure the CSV file is in the correct COAEP format.",
+    };
+  }
 
   // Get Faculty, School Year, Course, Semester info from the file
   rows.forEach((row) => {
@@ -38,21 +38,44 @@ export function parseCOAEP(csvString: string) {
     const courseIdx = row.indexOf("Course:");
     const semesterIdx = row.indexOf("Semester");
 
-    data.COAEP.faculty = row[facName + 1]?.trim() || data.COAEP.faculty;
-    data.COAEP.sy = row[schoolYear + 1]?.trim() || data.COAEP.sy;
-    data.COAEP.course = row[courseIdx + 1]?.trim() || data.COAEP.course;
-
-    const semStr = row[semesterIdx + 1]?.trim() || "";
-    const semNum = semStr.match(/\d+/)?.[0];
-    data.COAEP.semester = semNum ? parseInt(semNum, 10) : data.COAEP.semester;
+    if (facName !== -1) {
+      data.COAEP.faculty = row[facName + 1]?.trim() || data.COAEP.faculty;
+    }
+    if (schoolYear !== -1) {
+      data.COAEP.sy = row[schoolYear + 1]?.trim() || data.COAEP.sy;
+    }
+    if (courseIdx !== -1) {
+      data.COAEP.course = row[courseIdx + 1]?.trim() || data.COAEP.course;
+    }
+    if (semesterIdx !== -1) {
+      const semStr = row[semesterIdx + 1]?.trim() || "";
+      const semNum = semStr.match(/\d+/)?.[0];
+      data.COAEP.semester = semNum ? parseInt(semNum, 10) : data.COAEP.semester;
+    }
   });
 
   let currentCO: CO | null = null;
 
-  rows.forEach((row) => {
-    const coNum = row[coIdx]?.trim() || ""; // coIdx is the CO Number
-    const coState = row[coIdx + 1]?.trim() || ""; // coIdx is the CO Statement
-    const iloState = row[iloIdx]?.trim() || ""; // iloIdx is the ILO Statement
+  rows.forEach((row, rowIndex) => {
+    // Skip rows before or at the header row
+    if (rowIndex <= headerRowIndex) return;
+
+    // Try to find CO Number and Statement - check both possible formats
+    // Format 1: CO Number at coIdx-1, CO Statement at coIdx
+    // Format 2: CO Number at coIdx, CO Statement at coIdx+1
+    let coNum = row[coIdx - 1]?.trim() || "";
+    let coState = row[coIdx]?.trim() || "";
+
+    // If coIdx contains a number, use format 2
+    if (/^\d+$/.test(row[coIdx]?.trim() || "")) {
+      coNum = row[coIdx]?.trim() || "";
+      coState = row[coIdx + 1]?.trim() || "";
+    }
+
+    const iloState = row[iloIdx]?.trim() || "";
+    const assessmentTool =
+      row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "").trim() || "";
+    const perfTargetStr = row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
 
     if (coNum && /^\d+$/.test(coNum)) {
       if (currentCO) {
@@ -67,13 +90,27 @@ export function parseCOAEP(csvString: string) {
       };
     }
 
-    if (currentCO && iloState) {
+    if (currentCO && iloState && perfTargetStr) {
       const iloStatement = iloState.replace(/^ILO\d+[:.]?\s*/, "");
 
-      const assessmentTool =
-        row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "") || "";
-      const perfTargetStr =
-        row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
+      // Skip footer/metadata rows (like "Revision No:", "Prepared by:", etc.)
+      if (
+        iloStatement.match(
+          /^(Revision|Prepared|Date|Approved|Effectivity|Page)/i
+        ) ||
+        iloStatement.length < 10
+      ) {
+        return;
+      }
+
+      // Extract assessment tool from ILO statement if not in separate column
+      let finalAssessmentTool = assessmentTool;
+      if (!finalAssessmentTool && iloStatement.includes(":")) {
+        const match = iloStatement.match(/^ILO\d+:\s*(.+?)(?:\s*\(|$)/);
+        if (match) {
+          finalAssessmentTool = match[1]?.trim() || "";
+        }
+      }
 
       const { performance_target, passing_score } =
         performaceTarget(perfTargetStr);
@@ -81,15 +118,10 @@ export function parseCOAEP(csvString: string) {
       currentCO.ilo.push({
         statement: iloStatement,
         verb: extractInstructionalVerb(iloStatement) || "",
-        assessment_tool: assessmentTool,
+        assessment_tool: finalAssessmentTool,
         performance_target,
         passing_score,
       });
-    }
-
-    if (row.every((cell) => cell.trim() === "")) {
-      // Stop processing further rows if all cells are empty
-      return;
     }
   });
 
