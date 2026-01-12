@@ -14,7 +14,7 @@ export async function uploadPOAEP(
     const data = await csv.text();
     const parsed = parsePOAEP(data);
     const res = await fetch(
-      `${url}/poaeps/upload?course_id=${course_id}&curr_id=${curr_id}&period_id=${period_id}`,
+      `${url}/program-outcomes/coaep/upload?course_id=${course_id}&curr_id=${curr_id}&period_id=${period_id}`,
       {
         method: "POST",
         headers: {
