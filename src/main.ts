@@ -5,6 +5,7 @@ import { uploadEnrolledStudent } from "./relay/uploadEnrolledStudent";
 import { uploadClassList } from "./relay/uploadClassList";
 import { uploadAssessmentData } from "./relay/uploadAssessmentData";
 import { uploadDeptFaculty } from "./relay/uploadDeptFaculty";
+import { uploadPOAEP } from "./relay/uploadPOAEP";
 
 export default class Client {
   private BASE_URL: string;
@@ -62,6 +63,24 @@ export default class Client {
 
       deptFaculty: async (xls: File) => {
         const res = await uploadDeptFaculty(this.BASE_URL, xls);
+        return res;
+      },
+
+      poaep: async (
+        xls: File,
+        token: string,
+        course_id: string,
+        curr_id: string,
+        period_id: number
+      ) => {
+        const res = await uploadPOAEP(
+          this.BASE_URL,
+          xls,
+          token,
+          course_id,
+          curr_id,
+          period_id
+        );
         return res;
       },
     };
