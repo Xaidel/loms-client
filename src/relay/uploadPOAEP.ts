@@ -1,4 +1,4 @@
-import { parsePOAEP } from "../parser/poaep";
+import parsePOAEP from "../parser/poaep";
 import { convertToCSVFile } from "../parser/xls";
 
 export async function uploadPOAEP(

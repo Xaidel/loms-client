@@ -12,7 +12,7 @@ const HEADERS = {
 export default function getPoaepHeader(rows: string[][]) {
   // Default indices (fallback)
   let indices = {
-    headerRowIndex: -1,
+    headerIdx: -1,
     poIdx: -1,
     tlIdx: -1,
     piIdx: -1,
@@ -23,24 +23,38 @@ export default function getPoaepHeader(rows: string[][]) {
   };
 
   // Scan the first 20 rows (headers usually aren't lower than this)
-  for (let r = 0; r < Math.min(rows.length, 20); r++) {
-    const row = (rows[r] ?? []).map((cell) => cell.toLowerCase().trim());
+  for (let i = 0; i < Math.min(rows.length, 20); i++) {
+    const row = (rows[i] ?? []).map((cell) => cell.toLowerCase().trim());
 
     // Check if this row matches our keywords
-    const po = row.findIndex((c) => HEADERS.po.some((k) => c.includes(k)));
-    const tl = row.findIndex((c) => HEADERS.tl.some((k) => c.includes(k)));
-    const pi = row.findIndex((c) => HEADERS.pi.some((k) => c.includes(k)));
-    const fc = row.findIndex((c) => HEADERS.fc.some((k) => c.includes(k)));
-    const sc = row.findIndex((c) => HEADERS.sc.some((k) => c.includes(k)));
-    const at = row.findIndex((c) => HEADERS.at.some((k) => c.includes(k)));
-    const pt = row.findIndex((c) => HEADERS.pt.some((k) => c.includes(k)));
+    const po = row.findIndex((c) =>
+      HEADERS.po.some((k) => c.toLowerCase().includes(k))
+    );
+    const tl = row.findIndex((c) =>
+      HEADERS.tl.some((k) => c.toLowerCase().includes(k))
+    );
+    const pi = row.findIndex((c) =>
+      HEADERS.pi.some((k) => c.toLowerCase().includes(k))
+    );
+    const fc = row.findIndex((c) =>
+      HEADERS.fc.some((k) => c.toLowerCase().includes(k))
+    );
+    const sc = row.findIndex((c) =>
+      HEADERS.sc.some((k) => c.toLowerCase().includes(k))
+    );
+    const at = row.findIndex((c) =>
+      HEADERS.at.some((k) => c.toLowerCase().includes(k))
+    );
+    const pt = row.findIndex((c) =>
+      HEADERS.pt.some((k) => c.toLowerCase().includes(k))
+    );
 
-    // Scoring: valid if we find at least 3 of the 4 headers in this row
+    // Scoring: valid if we find  at least 3 headers in this row
     const matches = [po, tl, pi, fc, sc, at, pt].filter((i) => i !== -1).length;
 
     if (matches >= 3) {
       indices = {
-        headerRowIndex: r,
+        headerIdx: i,
         poIdx: po,
         tlIdx: tl,
         piIdx: pi,
@@ -51,6 +65,10 @@ export default function getPoaepHeader(rows: string[][]) {
       };
       break;
     }
+  }
+
+  if (indices.headerIdx === -1) {
+    throw new Error("No valid headers found in POAEP file.");
   }
 
   return indices;

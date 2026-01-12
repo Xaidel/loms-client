@@ -1,49 +1,33 @@
-//   provided:
-// curr_id
-// period_id
-// program_id
-
 export interface PO {
-  po_description: string;
+  po_desc: string;
   seq_no: number;
-  status: number;
-  is_active: boolean;
-  // program_id: number;
+  PerfIndicators: PerfIndicator[];
 }
 
 export interface PerfIndicator {
-  pi_id: number;
-  pi_description: string;
-  status: number;
-  is_active: boolean;
-  po_id: number;
+  pi_desc: string;
+  FormativeCourses: PIFormative[];
+  SummativeCourse: PISummative;
+  AssessmentTool: PIAssessmentTool;
+  PerformanceTargets: PIPerfTarget;
 }
 
 // changes with curri_id
 
 export interface PIFormative {
-  fc_id: number;
-  pi_id: number;
-  course_id: number;
+  course_id: string;
   cognitive_level: number;
-  // curr_id: string;
 }
 
 export interface PISummative {
-  pi_summ_id: number;
-  pi_id: number;
-  course_id: number;
-  status: number;
-  // curr_id: string;
+  course_id: string;
 }
 
-// changes with period_id
+export interface PIAssessmentTool {
+  at_desc: string;
+}
 
 export interface PIPerfTarget {
-  ppt_id: number;
-  pi_id: number;
   target_percent: number;
   min_score: number;
-  // period_id: number;
-  // curr_id: string;
 }
