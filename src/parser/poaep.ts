@@ -121,7 +121,9 @@ const parsePOAEP = (csvString: string) => {
     return {
       success: true,
       message: "Successfully parsed POAEP file.",
-      data: POs,
+      data: {
+        POAEP: POs,
+      },
     };
   } catch (error) {
     return {
@@ -133,46 +135,3 @@ const parsePOAEP = (csvString: string) => {
 };
 
 export default parsePOAEP;
-
-let testOut: PO[] = [
-  {
-    po_desc:
-      "Identify a way how to solve a problem using computing and domain knowledge based on its specifications and requirements",
-    seq_no: 1,
-
-    PerfIndicators: [
-      {
-        pi_desc:
-          "Identify a way how to solve a problem using computing and domain knowledge based on its specifications and requirements",
-
-        FormativeCourses: [
-          { course_id: "BCS111k", cognitive_level: 0 },
-          { course_id: "BCS112k", cognitive_level: 0 },
-          { course_id: "BCS122k", cognitive_level: 0 },
-          { course_id: "BCS212k", cognitive_level: 0 },
-          { course_id: "BCS224k", cognitive_level: 0 },
-          { course_id: "BCS222k", cognitive_level: 0 },
-        ],
-        SummativeCourse: { course_id: "BCS401k" },
-        AssessmentTool: { at_desc: "Project Proposal" },
-        PerformanceTargets: { target_percent: 80, min_score: 75 },
-      },
-      {
-        pi_desc:
-          "Create an appropriate software designs to describe a computing solution for the specified problems and requirements",
-
-        FormativeCourses: [
-          { course_id: "BIT112k", cognitive_level: 0 },
-          { course_id: "BIT122k", cognitive_level: 0 },
-          { course_id: "BIT212k", cognitive_level: 0 },
-          { course_id: "BIT224k", cognitive_level: 0 },
-          { course_id: "BIT223k", cognitive_level: 0 },
-          { course_id: "BIT222k", cognitive_level: 0 },
-        ],
-        SummativeCourse: { course_id: "BCS411k" },
-        AssessmentTool: { at_desc: "SP Findings" },
-        PerformanceTargets: { target_percent: 80, min_score: 75 },
-      },
-    ],
-  },
-];
