@@ -69,17 +69,17 @@ export default class Client {
       poaep: async (
         xls: File,
         token: string,
-        course_id: string,
         curr_id: string,
-        period_id: number
+        period_id: number,
+        program_id: number
       ) => {
         const res = await uploadPOAEP(
           this.BASE_URL,
           xls,
           token,
-          course_id,
           curr_id,
-          period_id
+          period_id,
+          program_id
         );
         return res;
       },

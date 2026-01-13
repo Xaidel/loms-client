@@ -4,17 +4,6 @@ import { performaceTarget } from "../helper/performaceTarget.helper";
 import getPoaepHeader from "../helper/header-getter/getPoaepHeader";
 import parseFormativeCourses from "../helper/parseFormativeCourses.helper";
 
-type Indices = {
-  headerRowIndex: number;
-  poIdx: number;
-  tlIdx: number;
-  piIdx: number;
-  fcIdx: number;
-  scIdx: number;
-  atIdx: number;
-  ptIdx: number;
-};
-
 const parsePOAEP = (csvString: string) => {
   try {
     const rows: string[][] = Papa.parse<string[]>(csvString, {
@@ -74,19 +63,20 @@ const parsePOAEP = (csvString: string) => {
       if (fc === "") throw new Error(`Empty Formative Courses at row ${i}.`);
 
       const sc = row[scIdx]?.trim() || lastSC;
-      lastSC = sc;
       if (sc === "") throw new Error(`Empty Summative Course at row ${i}.`);
+      lastSC = sc;
 
       const at = row[atIdx]?.trim() || lastAT;
-      lastAT = at;
       if (at === "") throw new Error(`Empty Assessment Tool at row ${i}.`);
+      lastAT = at;
 
       const pt = row[ptIdx]?.trim() || lastPT;
-      lastPT = pt;
       if (pt === "") throw new Error(`Empty Performance Target at row ${i}.`);
+      lastPT = pt;
 
-      // Taxonomy Level not implemented for now
+      // * Taxonomy Level not implemented for now
       // const tl = row[tlIdx]?.trim() || "";
+      // if (tl === "") throw new Error(`Empty Taxonomy Level at row ${i}.`);
 
       // parse FormativeCourses
       const fcArr = parseFormativeCourses(fc);

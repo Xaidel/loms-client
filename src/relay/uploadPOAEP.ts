@@ -5,16 +5,16 @@ export async function uploadPOAEP(
   url: string,
   xls: File,
   token: string,
-  course_id: string,
   curr_id: string,
-  period_id: number
+  period_id: number,
+  program_id: number
 ) {
   try {
     const csv = await convertToCSVFile(xls);
     const data = await csv.text();
     const parsed = parsePOAEP(data);
     const res = await fetch(
-      `${url}/program-outcomes/poaep/upload?course_id=${course_id}&curr_id=${curr_id}&period_id=${period_id}`,
+      `${url}/program-outcomes/poaep/upload?curr_id=${curr_id}&period_id=${period_id}&program_id=${program_id}`,
       {
         method: "POST",
         headers: {
