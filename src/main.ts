@@ -6,6 +6,13 @@ import { uploadClassList } from "./relay/uploadClassList";
 import { uploadAssessmentData } from "./relay/uploadAssessmentData";
 import { uploadDeptFaculty } from "./relay/uploadDeptFaculty";
 import { uploadPOAEP } from "./relay/uploadPOAEP";
+import { get } from "@dotenvx/dotenvx";
+import getAssessmentData from "./payloads/getAssessmentData";
+import getClassList from "./payloads/getClassList";
+import { getCOAEP } from "./payloads/getCOAEP";
+import getCourseOffering from "./payloads/getCourseOffering";
+import getCurriculum from "./payloads/getCurriculum";
+import getPOAEP from "./payloads/getPOAEP";
 
 export default class Client {
   private BASE_URL: string;
@@ -81,6 +88,17 @@ export default class Client {
         );
         return res;
       },
+
+      /**
+       * Functions that parse then return the payload
+       * instead of directly calling the backend and returning the response
+       */
+      getAssessmentData,
+      getClassList,
+      getCOAEP,
+      getCourseOffering,
+      getCurriculum,
+      getPOAEP,
     };
   }
 }
