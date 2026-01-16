@@ -13,6 +13,8 @@ import { getCOAEP } from "./payloads/getCOAEP";
 import getCourseOffering from "./payloads/getCourseOffering";
 import getCurriculum from "./payloads/getCurriculum";
 import getPOAEP from "./payloads/getPOAEP";
+import getDeptFaculty from "./payloads/getDeptFaculty";
+import getEnrolledStudents from "./payloads/getEnrolledStudent";
 
 export default class Client {
   private BASE_URL: string;
@@ -99,6 +101,14 @@ export default class Client {
       getCourseOffering,
       getCurriculum,
       getPOAEP,
+
+      /**
+       * Functions that converts the xls to csv
+       * then returns the csv as formdata
+       */
+
+      getDeptFaculty,
+      getEnrolledStudents,
     };
   }
 }
