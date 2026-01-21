@@ -3,8 +3,8 @@ import { convertToCSVFile } from "../parser/xls";
 import { ParserResult } from "../types/parserResult";
 import { CurriculumCourses } from "../types/curriculum";
 
-const getCurriculum = async (
-  xls: File
+export const getCurriculumFromXLSX = async (
+  xls: File,
 ): Promise<ParserResult<{ curriculums: CurriculumCourses[] }>> => {
   try {
     const csv = await convertToCSVFile(xls);
@@ -28,5 +28,3 @@ const getCurriculum = async (
     } as ParserResult<{ curriculums: CurriculumCourses[] }>);
   }
 };
-
-export default getCurriculum;

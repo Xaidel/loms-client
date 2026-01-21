@@ -4,8 +4,8 @@ import { parseCourseOffering } from "../parser/courseOffering";
 import { ParserResult } from "../types/parserResult";
 import { CourseOffering } from "../types/courseOffering";
 
-const getCourseOffering = async (
-  xls: File
+export const getCourseOfferingFromXLSX = async (
+  xls: File,
 ): Promise<ParserResult<{ courseOfferings: CourseOffering[] }>> => {
   try {
     const csv = await convertToCSVFile(xls);
@@ -29,5 +29,3 @@ const getCourseOffering = async (
     } as ParserResult<{ courseOfferings: CourseOffering[] }>);
   }
 };
-
-export default getCourseOffering;

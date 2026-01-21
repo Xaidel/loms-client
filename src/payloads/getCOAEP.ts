@@ -14,8 +14,8 @@ type parseFailReturn = {
 
 type parseReturn = parseSuccessReturn | parseFailReturn;
 
-export async function getCOAEP(
-  xls: File
+export async function getCOAEPFromXLSX(
+  xls: File,
 ): Promise<ParserResult<{ COAEP: COAEP }>> {
   try {
     const csv = await convertToCSVFile(xls);
@@ -41,6 +41,24 @@ export async function getCOAEP(
     return Promise.reject({
       success: false,
       message: "Error parsing COAEP Data.",
+      error,
+    } as ParserResult<{ COAEP: COAEP }>);
+  }
+}
+
+export async function getCOAEPFromCSV(
+  csv: string,
+): Promise<ParserResult<{ COAEP: COAEP }>> {
+  try {
+    const result = parseCOAEP(csv) as ParserResult<{ COAEP: COAEP }>;
+    if (!result.success) {
+      return Promise.reject(result);
+    }
+    return Promise.resolve(result);
+  } catch (error) {
+    return Promise.reject({
+      success: false,
+      message: "Error parsing COAEP",
       error,
     } as ParserResult<{ COAEP: COAEP }>);
   }

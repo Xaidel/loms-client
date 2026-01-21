@@ -1,8 +1,8 @@
 import { convertToCSVFile } from "../parser/xls";
 import { ParserResult } from "../types/parserResult";
 
-const getEnrolledStudents = async (
-  xls: File
+export const getEnrolledStudentsFromXLSX = async (
+  xls: File,
 ): Promise<ParserResult<{ body: FormData }>> => {
   try {
     const csv = await convertToCSVFile(xls);
@@ -25,5 +25,3 @@ const getEnrolledStudents = async (
     } as ParserResult<{ body: FormData }>);
   }
 };
-
-export default getEnrolledStudents;
