@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { CO, COAEP } from "../types/coaep";
+import { ILO, CO, COAEP } from "../types/coaep";
 import { performaceTarget } from "../helper/performaceTarget.helper";
 import getCoaepHeader from "../helper/header-getter/getCoaepHeader";
 import extractFromObjective from "../helper/extractFromObjective.helper";
@@ -84,13 +84,20 @@ export function parseCOAEP(csvString: string) {
       const stmt = coState;
       const { verb, cognitive_level, taxonomy_level } =
         extractFromObjective(stmt);
+
+      if (!verb) {
+        return {
+          error: "Could not find verb.",
+          message: `Please ensure the Course Outcome #${coNum} is in the correct format.`,
+        };
+      }
       currentCO = {
         statement: stmt,
         ilo: [],
-        verb: verb,
-        cognitive_level: cognitive_level,
-        taxonomy_level: taxonomy_level,
-      };
+        verb,
+        cognitive_level,
+        taxonomy_level,
+      } as CO;
     }
 
     if (currentCO && iloState && perfTargetStr) {
@@ -126,10 +133,10 @@ export function parseCOAEP(csvString: string) {
         assessment_tool: finalAssessmentTool,
         performance_target,
         passing_score,
-        verb: verb,
-        cognitive_level: cognitive_level,
-        taxonomy_level: taxonomy_level,
-      });
+        verb,
+        cognitive_level,
+        taxonomy_level,
+      } as ILO);
     }
   });
 

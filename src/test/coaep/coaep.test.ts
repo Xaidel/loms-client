@@ -1,6 +1,7 @@
 import { parseCOAEP } from "../../parser/coaep";
 import * as fs from "fs";
 import * as path from "path";
+import * as XLSX from "xlsx";
 
 /**
  * Test suite for COAEP parser
@@ -10,19 +11,33 @@ import * as path from "path";
  */
 
 // Load the actual sample COAEP CSV file
-const sampleFilePath = path.join(__dirname, "sample-coaep.csv");
-const validCoaepCSV = fs.existsSync(sampleFilePath)
-  ? fs.readFileSync(sampleFilePath, "utf-8")
-  : `
-Name of Faculty:,John Doe,,,School Year,2023-2024
-Course:,Computer Science 101,,,Semester,1
+// Load the actual sample POAEP Excel file and convert to CSV
+const sampleFilePath = path.join(__dirname, "test-file.local.xlsx");
 
-CO Number,CO Statement,,ILO Number,ILO Statement,Assessment Tool,Performance Target
-1,Understand basic programming concepts,,ILO1,Apply problem-solving techniques,Midterm Exam,80% of students will score 75% or higher
-,,,ILO2,Demonstrate critical thinking,Final Project,85% of students will score 70% or higher
-2,Develop software applications,,ILO3,Create functional programs,Lab Exercise,90% of students will score 80% or higher
-,,,ILO4,Test and debug code,Programming Assignment,75% of students will score 65% or higher
-`;
+let validCoaepCSV = "";
+
+if (fs.existsSync(sampleFilePath)) {
+  try {
+    const fileBuffer = fs.readFileSync(sampleFilePath);
+    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+
+    const sheetName = workbook.SheetNames[0];
+    if (sheetName) {
+      const workSheet = workbook.Sheets[sheetName];
+      if (workSheet) {
+        validCoaepCSV = XLSX.utils.sheet_to_csv(workSheet);
+      } else {
+        console.error("Worksheet not found");
+      }
+    } else {
+      console.error("No sheets found in workbook");
+    }
+  } catch (error) {
+    console.error("Error reading Excel file:", error);
+  }
+} else {
+  console.error("Sample COAEP Excel file not found at:", sampleFilePath);
+}
 
 // Sample CSV with missing headers
 const missingHeadersCSV = `
@@ -37,7 +52,7 @@ Name of Faculty:,Jane Smith,,,School Year,2024-2025
 Course:,Mathematics 201,,,Semester,2
 
 CO Number,CO Statement,,ILO Number,ILO Statement,Assessment Tool,Performance Target
-1,Apply mathematical concepts,,,,
+1,(I) Remembering : Apply mathematical concepts,,,,
 `;
 
 // Test 1: Parse valid COAEP data
