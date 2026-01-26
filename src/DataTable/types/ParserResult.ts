@@ -4,3 +4,5 @@ export type ParserResult<T = any> = {
   data?: T;
   error?: any;
 };
+
+export default ParserResult;

@@ -1,9 +1,9 @@
 import Papa from "papaparse";
 import { CO, COAEP, ILO } from "../../types/coaep";
-import { DataTable, DataTableInfo } from "../DataTable";
-import { ParserResult } from "../../types/parserResult";
+import { DataTable, DataTableInfo } from "./DataTable";
+import { ParserResult } from "../types/ParserResult";
 import getCoaepHeader from "../../helper/header-getter/getCoaepHeader";
-import DataTableException from "../DataTableException";
+import DataTableException from "../types/DataTableException";
 import extractFromObjective from "../../helper/extractFromObjective.helper";
 import { performaceTarget } from "../../helper/performaceTarget.helper";
 

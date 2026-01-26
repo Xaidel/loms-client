@@ -1,6 +1,7 @@
-import { convertToCSVFile } from "../parser/xls";
-import { ParserResult } from "../types/parserResult";
-import DataTableException from "./DataTableException";
+import { convertToCSVFile } from "../../parser/xls";
+import { ParserResult } from "../types/ParserResult";
+
+import DataTableException from "../types/DataTableException";
 
 export type DataTableInfo = {
   name: string;
@@ -13,7 +14,7 @@ export abstract class DataTable<T = any> {
   protected table: (string | null)[][] = [];
   headers: string[];
 
-  protected constructor() {
+  constructor() {
     this.name = "DataTable";
     this.table = [];
     this.headers = [];
