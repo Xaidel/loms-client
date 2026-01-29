@@ -1,67 +1,64 @@
-import { CO, COAEP } from "../../../../types/coaep";
+import { COAEP } from "../../../../types/coaep";
 import { CoaepDT } from "../../CoaepDT";
 import DataTableException from "../../../types/DataTableException";
-
-const dteFrom = "MIN_CO_TAXO";
+import { DTValidator } from "../../DTValidator";
 
 const invalidTaxos = ["remembering", "understanding"];
 
-/**
- * Validates if the CO Taxonomy Levels are at least "Analyzing".
- *
- * @param validMsgs
- * @param tableErrors
- * @param coaepDT
- * @param coaepObj
- * @returns
- */
-export const validateMinCOtaxo = async (
-  validMsgs: string[],
-  tableErrors: DataTableException[],
-  coaepDT: CoaepDT,
-  coaepObj: COAEP | null,
-) => {
-  if (!coaepObj) {
-    tableErrors.push({
-      error: "Unable to access COAEP object.",
-      from: dteFrom,
-    });
-    return;
+export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
+  constructor() {
+    super("MIN_CO_TAXO");
   }
 
-  for (const co of coaepObj.co) {
-    if (!co.taxonomy_level) {
+  async validate(
+    validMsgs: string[],
+    tableErrors: DataTableException[],
+    coaepDT: CoaepDT,
+    coaepObj: COAEP | null,
+  ): Promise<void> {
+    const localErrors: DataTableException[] = [];
+
+    if (!coaepObj) {
       tableErrors.push({
-        error: `No taxonomy level for CO Statement: ${co.statement}`,
-        from: dteFrom,
+        error: "Unable to access COAEP object.",
+        from: this.name,
       });
-      continue;
+      return;
     }
 
-    for (const invalidTaxo of invalidTaxos) {
-      if (co.taxonomy_level === invalidTaxo) {
-        const { row, column } = await coaepDT.findValue(co.statement);
+    for (const co of coaepObj.co) {
+      if (!co.taxonomy_level) {
+        localErrors.push({
+          error: `No taxonomy level for CO Statement: ${co.statement}`,
+          from: this.name,
+        });
+        continue;
+      }
 
-        let tbe = {
-          error: `Cannot have CO Taxonomy Level of lower than Applying: ${co.taxonomy_level.toUpperCase()}`,
-          from: dteFrom,
-        } as DataTableException;
+      for (const invalidTaxo of invalidTaxos) {
+        if (co.taxonomy_level === invalidTaxo) {
+          const { row, column } = await coaepDT.findValue(co.statement);
 
-        if (row !== -1 || column !== -1) {
-          tbe = {
-            ...tbe,
-            row,
-            column,
+          let tbe = {
+            error: `Cannot have CO Taxonomy Level of lower than Applying: ${co.taxonomy_level.toUpperCase()}`,
+            from: this.name,
           } as DataTableException;
-        }
 
-        tableErrors.push(tbe);
+          if (row !== -1 || column !== -1) {
+            tbe = {
+              ...tbe,
+              row,
+              column,
+            } as DataTableException;
+          }
+
+          localErrors.push(tbe);
+        }
       }
     }
+
+    if (localErrors.length > 0) tableErrors.push(...localErrors);
+    else validMsgs.push(`${this.name} successfully validated.`);
+    return;
   }
-
-  validMsgs.push("Successfully validated minimum CO Taxonomy Level.");
-  Promise.resolve();
-};
-
-export default validateMinCOtaxo;
+}

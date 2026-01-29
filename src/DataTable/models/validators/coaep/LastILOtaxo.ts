@@ -28,8 +28,11 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
       const co = coaepObj.co[i];
 
       if (!co) {
+        const { row, column } = await coaepDT.findValue(i + 1 + "");
         localErrors.push({
           error: `No CO Statement for CO ${i + 1}.`,
+          row,
+          column: column + 1,
           from: this.name,
         });
 
@@ -52,16 +55,24 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
       const lastILO = co.ilo[lastILOIdx];
 
       if (!lastILO!.taxonomy_level) {
+        const { row, column } = await coaepDT.findValue(lastILO!.statement);
+
         localErrors.push({
           error: `Last ILO for CO ${i + 1} has no Taxonomy Level.`,
+          row,
+          column,
           from: this.name,
         });
         continue;
       }
 
       if (lastILO!.taxonomy_level !== co.taxonomy_level) {
+        const { row, column } = await coaepDT.findValue(lastILO!.statement);
+
         localErrors.push({
           error: `Last ILO for CO ${i + 1} does not match the CO's Taxonomy Level. (${lastILO!.taxonomy_level} !== ${co.taxonomy_level})`,
+          row,
+          column,
           from: this.name,
         });
       }
@@ -72,3 +83,5 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
     return;
   }
 }
+
+export default LastILOTaxo;

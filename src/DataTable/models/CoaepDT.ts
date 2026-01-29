@@ -6,8 +6,8 @@ import getCoaepHeader from "../../helper/header-getter/getCoaepHeader";
 import DataTableException from "../types/DataTableException";
 import extractFromObjective from "../../helper/extractFromObjective.helper";
 import { performaceTarget } from "../../helper/performaceTarget.helper";
-import validateMinCOtaxo from "./validators/coaep/MinCOtaxo";
-import { LastILOTaxo } from "./validators/coaep/LastILOtaxo";
+import LastILOTaxo from "./validators/coaep/LastILOtaxo";
+import { MinCOtaxo } from "./validators/coaep/MinCOtaxo";
 
 export class CoaepDT extends DataTable<COAEP> {
   faculty: string | null = null;
@@ -19,6 +19,7 @@ export class CoaepDT extends DataTable<COAEP> {
     super();
     this.name = "CoaepDT";
     this.useValidator(new LastILOTaxo());
+    this.useValidator(new MinCOtaxo());
   }
 
   async fromCSVString(csvString: string): Promise<ParserResult<DataTableInfo>> {
