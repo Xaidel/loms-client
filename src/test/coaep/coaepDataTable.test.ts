@@ -3,7 +3,7 @@ import * as path from "path";
 import * as XLSX from "xlsx";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { COAEPDataTable } from "../../DataTable/models/COAEPTable";
+import { CoaepDT } from "../../DataTable/models/CoaepDT";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,14 +36,18 @@ if (fs.existsSync(sampleFilePath)) {
 
 console.log("=== Test 1: Valid COAEP CSV ===");
 
-const coaepDT = new COAEPDataTable();
+const coaepDT = new CoaepDT();
 await coaepDT.initializeTable(validCoaepCSV);
-console.log(coaepDT.getTable().data);
+// console.log(coaepDT.getTable().data);
 
 // const result = await coaepDT.toJson();
-// console.log(result);
+
+// console.dir(result, { depth: null });
 // console.log(result.data?.COAEP);
 // console.log(result.data?.COAEP?.co[0]);
 // console.log(result.error.tableErrors);
+
+const result = await coaepDT.validate();
+console.dir(result, { depth: null });
 
 console.log("=== All Tests Complete ===");

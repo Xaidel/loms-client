@@ -6,8 +6,10 @@ import getCoaepHeader from "../../helper/header-getter/getCoaepHeader";
 import DataTableException from "../types/DataTableException";
 import extractFromObjective from "../../helper/extractFromObjective.helper";
 import { performaceTarget } from "../../helper/performaceTarget.helper";
+import validateMinCOtaxo from "./validators/coaep/MinCOtaxo";
+import { LastILOTaxo } from "./validators/coaep/LastILOtaxo";
 
-export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
+export class CoaepDT extends DataTable<COAEP> {
   faculty: string | null = null;
   course: string | null = null;
   sy: string | null = null;
@@ -15,7 +17,8 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
 
   constructor() {
     super();
-    this.name = "COAEP DataTable";
+    this.name = "CoaepDT";
+    this.useValidator(new LastILOTaxo());
   }
 
   async fromCSVString(csvString: string): Promise<ParserResult<DataTableInfo>> {
@@ -111,47 +114,16 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
     }
   }
 
-  async validate(): Promise<
-    ParserResult<{ validMsgs: string[]; tableErrors: DataTableException[] }>
+  async toJson(): Promise<
+    ParserResult<{
+      jsonObj: COAEP | null;
+      validMsgs: string[];
+      tableErrors: DataTableException[];
+    }>
   > {
-    try {
-      const tableErrors: DataTableException[] = [];
-      const validMsgs: string[] = [];
-      this.assertInitialized()
-        .then((msg: string) => {
-          validMsgs.push(msg);
-        })
-        .catch((error: DataTableException) => tableErrors.push(error));
-
-      // insert more asserts here
-
-      let msg = "Successfully validated COAEP datatable.";
-      if (validMsgs.length) {
-        msg += ` Passed ${validMsgs.length} validations.`;
-      }
-      if (tableErrors.length) {
-        msg += ` Found ${tableErrors.length} errors.`;
-      }
-
-      return {
-        success: true,
-        message: msg,
-        data: {
-          validMsgs,
-          tableErrors,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: "Error validating COAEP datatable.",
-        error: error,
-      } as ParserResult;
-    }
-  }
-
-  async toJson(): Promise<ParserResult<{ COAEP: COAEP }>> {
+    const validMsgs: string[] = [];
     const tableErrors: DataTableException[] = [];
+    const dteFrom = "COAEPDT_TO_JSON";
     try {
       await this.assertInitialized();
 
@@ -174,6 +146,7 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
             error: "Cannot have empty CO Statement in first row.",
             row: 0,
             column: 1,
+            from: dteFrom,
           });
 
         // if new CO, flush stored values
@@ -194,6 +167,7 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
             error: "Cannot have empty ILO.",
             row: 1,
             column: 2,
+            from: dteFrom,
           });
 
         // if empty assessTool, push error
@@ -202,6 +176,7 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
             error: "Cannot have empty Assessment Tool.",
             row: i,
             column: 3,
+            from: dteFrom,
           });
 
         // if empty perfTarget, push error
@@ -210,6 +185,7 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
             error: "Cannot have empty Performance Target.",
             row: i,
             column: 4,
+            from: dteFrom,
           });
 
         // if new co, generate new co
@@ -257,7 +233,11 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
         return {
           success: false,
           message: "Found validation errors prior to conversion.",
-          error: { tableErrors },
+          data: {
+            jsonObj: null,
+            validMsgs,
+            tableErrors,
+          },
         } as ParserResult;
       }
 
@@ -265,7 +245,9 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
         success: true,
         message: "Successfully converted COAEP datatable to JSON",
         data: {
-          COAEP,
+          jsonObj: COAEP,
+          validMsgs,
+          tableErrors,
         },
       } as ParserResult;
     } catch (error) {
@@ -273,6 +255,11 @@ export class COAEPDataTable extends DataTable<{ COAEP: COAEP }> {
         success: false,
         message: "Error converting COAEP datatable to JSON",
         error: error,
+        data: {
+          jsonObj: null,
+          validMsgs,
+          tableErrors,
+        },
       } as ParserResult;
     }
   }
