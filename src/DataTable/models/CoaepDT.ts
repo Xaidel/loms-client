@@ -19,8 +19,16 @@ export class CoaepDT extends DataTable<COAEP> {
   constructor() {
     super();
     this.name = "CoaepDT";
-    this.useValidator(new LastILOTaxo());
+
+    // * Custom validators
+
+    // CO's taxo should be Applying or higher
     this.useValidator(new MinCOtaxo());
+
+    // Last ILO 's taxo should match the CO's
+    this.useValidator(new LastILOTaxo());
+
+    // The ILO's within a CO should be in order
     this.useValidator(new ILOTaxoOrder());
   }
 

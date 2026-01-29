@@ -23,11 +23,6 @@ export abstract class DataTable<T> {
     this.validators = [] as DTValidator<this, T>[];
   }
 
-  async setTable(table: (string | null)[][]): Promise<void> {
-    await this.assertInitialized();
-    this.table = table;
-  }
-
   getName(): string {
     return this.name;
   }
@@ -53,6 +48,11 @@ export abstract class DataTable<T> {
         headers: this.headers,
       } satisfies DataTableInfo,
     } as ParserResult<DataTableInfo>;
+  }
+
+  async setTable(table: (string | null)[][]): Promise<void> {
+    await this.assertInitialized();
+    this.table = table satisfies (string | null)[][];
   }
 
   abstract fromCSVString(

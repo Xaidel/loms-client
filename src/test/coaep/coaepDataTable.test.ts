@@ -37,19 +37,31 @@ if (fs.existsSync(sampleFilePath)) {
 console.log("=== Test 1: Valid COAEP CSV ===");
 
 const coaepDT = new CoaepDT();
+
+// initialize with CSV
 await coaepDT.initializeTable(validCoaepCSV);
-// console.log(coaepDT.getTable().data);
 
-// const result = await coaepDT.toJson();
+// Fetch table Data
+console.log("== Fetch Table Data ===");
+const result1 = coaepDT.getTable();
+console.dir(result1, { depth: null });
 
-// console.dir(result, { depth: null });
-// console.log(result.data?.COAEP);
-// console.log(result.data?.COAEP?.co[0]);
-// console.log(result.error.tableErrors);
+// Update table data
+console.log("== Update Table Data ===");
+let table = result1.data!.table;
+table[0]![3] = "New Assessment tool";
+await coaepDT.setTable(table);
+let result2 = await coaepDT.toJson();
+console.dir(result2!.data!.jsonObj!.co[0]!.ilo[0], { depth: null });
 
-const result = await coaepDT.validate();
-console.dir(result, { depth: null });
+// validation
+console.log("== Validation ===");
+const result3 = await coaepDT.validate();
+console.dir(result3, { depth: null });
 
-// console.dir(await coaepDT.toJson(), { depth: null });
+// Convert to JSON
+console.log("== Convert to JSON ===");
+const result4 = await coaepDT.toJson();
+console.dir(result4, { depth: null });
 
 console.log("=== All Tests Complete ===");
