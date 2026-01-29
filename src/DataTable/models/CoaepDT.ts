@@ -230,16 +230,23 @@ export class CoaepDT extends DataTable<COAEP> {
       });
 
       if (tableErrors.length) {
+        tableErrors.push({
+          error: "Converted COAEP datatable to JSON, but with errors.",
+          from: dteFrom,
+        } as DataTableException);
+
         return {
           success: false,
-          message: "Found validation errors prior to conversion.",
+          message: "Converted COAEP datatable to JSON, but with errors.",
           data: {
-            jsonObj: null,
+            jsonObj: COAEP,
             validMsgs,
             tableErrors,
           },
         } as ParserResult;
       }
+
+      validMsgs.push("Successfully converted COAEP datatable to JSON.");
 
       return {
         success: true,
@@ -251,13 +258,17 @@ export class CoaepDT extends DataTable<COAEP> {
         },
       } as ParserResult;
     } catch (error) {
+      tableErrors.push({
+        error: "Error converting COAEP datatable to JSON",
+        from: dteFrom,
+      } as DataTableException);
+
       return {
         success: false,
         message: "Error converting COAEP datatable to JSON",
         error: error,
         data: {
           jsonObj: null,
-          validMsgs,
           tableErrors,
         },
       } as ParserResult;

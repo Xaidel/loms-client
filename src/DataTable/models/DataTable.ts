@@ -55,13 +55,21 @@ export abstract class DataTable<T> {
     } as ParserResult<DataTableInfo>;
   }
 
-  useValidator(validator: DTValidator<this, T>) {
-    this.validators.push(validator);
-  }
-
   abstract fromCSVString(
     csvString: string,
   ): Promise<ParserResult<DataTableInfo>>;
+
+  abstract toJson(): Promise<
+    ParserResult<{
+      jsonObj: T | null;
+      validMsgs: string[];
+      tableErrors: DataTableException[];
+    }>
+  >;
+
+  useValidator(validator: DTValidator<this, T>) {
+    this.validators.push(validator);
+  }
 
   async fromXML(
     xls: File,
@@ -73,40 +81,21 @@ export abstract class DataTable<T> {
     return this.fromCSVString(csvString);
   }
 
-  // async validateToJson(
-  //   validMsgs: string[],
-  //   tableErrors: DataTableException[],
-  // ): Promise<ParserResult<T>> {
-  //   const { success, message, data, error } = await this.toJson();
-  //   const dteFrom = `${this.name}_TO_JSON`;
-
-  //   if (!success || !data) {
-  //     if (error?.tableErrors) tableErrors.push(...error.tableErrors);
-  //     else
-  //       tableErrors.push({
-  //         error: `${this.name} failed to convert to JSON object.`,
-  //         from: dteFrom,
-  //       });
-
-  //     return {
-  //       success: false,
-  //       message: `${this.name} failed to convert to JSON object.`,
-  //     } as ParserResult;
-  //   }
-
-  //   validMsgs.push(`${this.name} successfully converted to JSON object.`);
-  //   return {
-  //     success: true,
-  //     message: `${this.name} successfully converted to JSON object.`,
-  //     data,
-  //   } as ParserResult;
-  // }
+  async findValue(str: string): Promise<{ row: number; column: number }> {
+    await this.assertInitialized();
+    for (let i = 0; i < this.table.length; i++) {
+      for (let j = 0; j < this.table[i]!.length; j++) {
+        if (this.table[i]![j] === str) {
+          return { row: i, column: j };
+        }
+      }
+    }
+    return { row: -1, column: -1 };
+  }
 
   async validate(): Promise<
     ParserResult<{ validMsgs: string[]; tableErrors: DataTableException[] }>
   > {
-    let isSuccess = true;
-
     const validMsgs: string[] = [];
     const tableErrors: DataTableException[] = [];
 
@@ -117,22 +106,12 @@ export abstract class DataTable<T> {
         })
         .catch((error: DataTableException) => tableErrors.push(error));
 
-      // const {
-      //   success,
-      //   message,
-      //   data: jsonObj,
-      //   error,
-      // } = await this.validateToJson(validMsgs, tableErrors);
-      // if (error) throw error;
-
       const { success, message, error, data: toJsonData } = await this.toJson();
 
-      if (!toJsonData) throw error;
+      if (!toJsonData) throw "Cannot access Json Object data.";
 
       validMsgs.push(...toJsonData.validMsgs);
       tableErrors.push(...toJsonData.tableErrors);
-
-      if (!toJsonData.jsonObj) throw error;
 
       const { jsonObj } = toJsonData;
 
@@ -140,43 +119,33 @@ export abstract class DataTable<T> {
         await validator.validate(validMsgs, tableErrors, this, jsonObj as T);
       }
 
+      let returnMsg = `${this.name} ran its validations.`;
+      if (validMsgs.length > 0)
+        returnMsg += ` ${validMsgs.length} validations were successful.`;
+      if (tableErrors.length > 0)
+        returnMsg += ` ${tableErrors.length} validations failed.`;
+
       return {
-        success,
-        message,
-        data: {
-          validMsgs,
-          tableErrors,
-        },
-      };
+        success: true,
+        message: returnMsg,
+        data: { validMsgs, tableErrors },
+      } as ParserResult;
     } catch (error) {
-      isSuccess = false;
       tableErrors.push({
         error:
           (error as string) ||
           `${this.name} failed to run all its validations.`,
         from: `${this.name}.validate()`,
+        cause: error,
       });
-    } finally {
+
       return {
-        success: isSuccess,
-        message: isSuccess
-          ? `${this.name} successfully ran its validations.`
-          : undefined,
-        error: isSuccess
-          ? undefined
-          : `${this.name} failed to run all its validations.`,
+        success: false,
+        message: `${this.name} failed to run all its validations.` as string,
         data: { validMsgs, tableErrors },
       } as ParserResult;
     }
   }
-
-  abstract toJson(): Promise<
-    ParserResult<{
-      jsonObj: T | null;
-      validMsgs: string[];
-      tableErrors: DataTableException[];
-    }>
-  >;
 
   async assertInitialized(): Promise<string> {
     if (this.headers.length === 0)
@@ -221,17 +190,5 @@ export abstract class DataTable<T> {
         error: error,
       } as ParserResult;
     }
-  }
-
-  async findValue(str: string): Promise<{ row: number; column: number }> {
-    await this.assertInitialized();
-    for (let i = 0; i < this.table.length; i++) {
-      for (let j = 0; j < this.table[i]!.length; j++) {
-        if (this.table[i]![j] === str) {
-          return { row: i, column: j };
-        }
-      }
-    }
-    return { row: -1, column: -1 };
   }
 }

@@ -3,6 +3,7 @@ type DataTableException = {
   row?: number;
   column?: number;
   from?: string;
+  cause?: any;
 };
 
 export default DataTableException;
