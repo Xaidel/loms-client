@@ -6,14 +6,7 @@ import { uploadClassList } from "./relay/uploadClassList";
 import { uploadAssessmentData } from "./relay/uploadAssessmentData";
 import { uploadDeptFaculty } from "./relay/uploadDeptFaculty";
 import { uploadPOAEP } from "./relay/uploadPOAEP";
-import { getAssessmentDataFromXLSX } from "./payloads/getAssessmentData";
-import { getClassListFromXLSX } from "./payloads/getClassList";
-import { getCOAEPFromCSV, getCOAEPFromXLSX } from "./payloads/getCOAEP";
-import { getCourseOfferingFromXLSX } from "./payloads/getCourseOffering";
-import { getCurriculumFromXLSX } from "./payloads/getCurriculum";
-import { getPOAEPFromCSV, getPOAEPFromXLSX } from "./payloads/getPOAEP";
-import { getDeptFacultyFromXLSX } from "./payloads/getDeptFaculty";
-import { getEnrolledStudentsFromXLSX } from "./payloads/getEnrolledStudent";
+import { CoaepDT } from "./DataTable/models/CoaepDT";
 
 export default class Client {
   private BASE_URL: string;
@@ -94,22 +87,7 @@ export default class Client {
        * Functions that parse then return the payload
        * instead of directly calling the backend and returning the response
        */
-      getAssessmentDataFromXLSX,
-      getClassListFromXLSX,
-      getCOAEPFromCSV,
-      getCOAEPFromXLSX,
-      getCourseOfferingFromXLSX,
-      getCurriculumFromXLSX,
-      getPOAEPFromCSV,
-      getPOAEPFromXLSX,
-
-      /**
-       * Functions that converts the xls to csv
-       * then returns the csv as formdata
-       */
-
-      getDeptFacultyFromXLSX,
-      getEnrolledStudentsFromXLSX,
+      CoaepDT,
     };
   }
 }
