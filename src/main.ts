@@ -5,6 +5,15 @@ import { uploadEnrolledStudent } from "./relay/uploadEnrolledStudent";
 import { uploadClassList } from "./relay/uploadClassList";
 import { uploadAssessmentData } from "./relay/uploadAssessmentData";
 import { uploadDeptFaculty } from "./relay/uploadDeptFaculty";
+import { uploadPOAEP } from "./relay/uploadPOAEP";
+import { getAssessmentDataFromXLSX } from "./payloads/getAssessmentData";
+import { getClassListFromXLSX } from "./payloads/getClassList";
+import { getCOAEPFromCSV, getCOAEPFromXLSX } from "./payloads/getCOAEP";
+import { getCourseOfferingFromXLSX } from "./payloads/getCourseOffering";
+import { getCurriculumFromXLSX } from "./payloads/getCurriculum";
+import { getPOAEPFromCSV, getPOAEPFromXLSX } from "./payloads/getPOAEP";
+import { getDeptFacultyFromXLSX } from "./payloads/getDeptFaculty";
+import { getEnrolledStudentsFromXLSX } from "./payloads/getEnrolledStudent";
 
 export default class Client {
   private BASE_URL: string;
@@ -50,7 +59,7 @@ export default class Client {
           this.BASE_URL,
           xls,
           subj_code,
-          period_id
+          period_id,
         );
         return res;
       },
@@ -64,6 +73,43 @@ export default class Client {
         const res = await uploadDeptFaculty(this.BASE_URL, xls);
         return res;
       },
+
+      poaep: async (
+        xls: File,
+        token: string,
+        curr_id: string,
+        period_id: number,
+      ) => {
+        const res = await uploadPOAEP(
+          this.BASE_URL,
+          xls,
+          token,
+          curr_id,
+          period_id,
+        );
+        return res;
+      },
+
+      /**
+       * Functions that parse then return the payload
+       * instead of directly calling the backend and returning the response
+       */
+      getAssessmentDataFromXLSX,
+      getClassListFromXLSX,
+      getCOAEPFromCSV,
+      getCOAEPFromXLSX,
+      getCourseOfferingFromXLSX,
+      getCurriculumFromXLSX,
+      getPOAEPFromCSV,
+      getPOAEPFromXLSX,
+
+      /**
+       * Functions that converts the xls to csv
+       * then returns the csv as formdata
+       */
+
+      getDeptFacultyFromXLSX,
+      getEnrolledStudentsFromXLSX,
     };
   }
 }

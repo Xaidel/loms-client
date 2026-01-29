@@ -1,15 +1,21 @@
 export interface ILO {
   statement: string;
-  verb: string;
   assessment_tool: string;
   performance_target: number | null;
   passing_score: number | null;
+
+  taxonomy_level: string | null;
+  cognitive_level: "I" | "E" | "D" | null;
+  verb: string | null;
 }
 
 export interface CO {
   statement: string;
-  verb: string;
   ilo: ILO[];
+
+  taxonomy_level: string | null;
+  cognitive_level: "I" | "E" | "D" | null;
+  verb: string | null;
 }
 
 export interface COAEP {

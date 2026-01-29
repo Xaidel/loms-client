@@ -1,8 +1,8 @@
 import Papa from "papaparse";
-import { CO, COAEP } from "../types/coaep";
+import { ILO, CO, COAEP } from "../types/coaep";
 import { performaceTarget } from "../helper/performaceTarget.helper";
-import extractInstructionalVerb from "../helper/extractInstructionalVerb.helper";
 import getCoaepHeader from "../helper/header-getter/getCoaepHeader";
+import extractFromObjective from "../helper/extractFromObjective.helper";
 
 export function parseCOAEP(csvString: string) {
   const rows: string[][] = Papa.parse<string[]>(csvString, {
@@ -82,12 +82,22 @@ export function parseCOAEP(csvString: string) {
         data.COAEP.co.push(currentCO);
       }
       const stmt = coState;
-      const verb = extractInstructionalVerb(stmt) || "";
+      const { verb, cognitive_level, taxonomy_level } =
+        extractFromObjective(stmt);
+
+      if (!verb) {
+        return {
+          error: "Could not find verb.",
+          message: `Please ensure the Course Outcome #${coNum} is in the correct format.`,
+        };
+      }
       currentCO = {
         statement: stmt,
-        verb: verb,
         ilo: [],
-      };
+        verb,
+        cognitive_level,
+        taxonomy_level,
+      } as CO;
     }
 
     if (currentCO && iloState && perfTargetStr) {
@@ -96,7 +106,7 @@ export function parseCOAEP(csvString: string) {
       // Skip footer/metadata rows (like "Revision No:", "Prepared by:", etc.)
       if (
         iloStatement.match(
-          /^(Revision|Prepared|Date|Approved|Effectivity|Page)/i
+          /^(Revision|Prepared|Date|Approved|Effectivity|Page)/i,
         ) ||
         iloStatement.length < 10
       ) {
@@ -115,13 +125,18 @@ export function parseCOAEP(csvString: string) {
       const { performance_target, passing_score } =
         performaceTarget(perfTargetStr);
 
+      const { verb, cognitive_level, taxonomy_level } =
+        extractFromObjective(iloStatement);
+
       currentCO.ilo.push({
         statement: iloStatement,
-        verb: extractInstructionalVerb(iloStatement) || "",
         assessment_tool: finalAssessmentTool,
         performance_target,
         passing_score,
-      });
+        verb,
+        cognitive_level,
+        taxonomy_level,
+      } as ILO);
     }
   });
 

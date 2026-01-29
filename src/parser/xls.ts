@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 
-export function convertToCSVFile(xls: File): Promise<File> {
+export function convertToCSVFile(xls: File, sheetName?: string): Promise<File> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -14,7 +14,11 @@ export function convertToCSVFile(xls: File): Promise<File> {
       try {
         const workbook = XLSX.read(data, { type: "array" });
 
-        const sheetName = workbook.SheetNames[0];
+        // const sheetName = workbook.SheetNames[0] ;
+        if (!sheetName) {
+          sheetName = workbook.SheetNames[0];
+        }
+
         if (!sheetName) {
           reject(new Error("No sheets found in workbook"));
           return;
