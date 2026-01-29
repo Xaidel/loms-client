@@ -1,13 +1,21 @@
 import { COAEP } from "../../../../types/coaep";
-import { CoaepDT } from "../../CoaepDT";
 import DataTableException from "../../../types/DataTableException";
+import { CoaepDT } from "../../CoaepDT";
 import { DTValidator } from "../../DTValidator";
 
-export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
-  constructor() {
-    super("LAST_ILO_TAXO");
-  }
+const taxoOrder: Record<string, number> = {
+  remembering: 1,
+  understanding: 2,
+  applying: 3,
+  analyzing: 4,
+  evaluating: 5,
+  creating: 6,
+};
 
+export class ILOTaxoOrder extends DTValidator<CoaepDT, COAEP> {
+  constructor() {
+    super("ILO_TAXO_ORDER");
+  }
   async validate(
     validMsgs: string[],
     tableErrors: DataTableException[],
@@ -51,30 +59,24 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
         continue;
       }
 
-      const lastILOIdx = co.ilo.length - 1;
-      const lastILO = co.ilo[lastILOIdx];
+      const firstIloAt: {
+        row: number;
+        column: number;
+      } = await coaepDT.findValue(co.ilo[0]!.statement);
+      const iloOrder = co.ilo.map((ilo) => taxoOrder[ilo.taxonomy_level!]);
 
-      if (!lastILO!.taxonomy_level) {
-        const { row, column } = await coaepDT.findValue(lastILO!.statement);
-
-        localErrors.push({
-          error: `Last ILO for CO ${i + 1} has no Taxonomy Level.`,
-          row,
-          column,
-          from: this.name,
-        });
-        continue;
-      }
-
-      if (lastILO!.taxonomy_level !== co.taxonomy_level) {
-        const { row, column } = await coaepDT.findValue(lastILO!.statement);
-
-        localErrors.push({
-          error: `Last ILO for CO ${i + 1} does not match the CO's Taxonomy Level. (${lastILO!.taxonomy_level} !== ${co.taxonomy_level})`,
-          row,
-          column,
-          from: this.name,
-        });
+      let lastValid = iloOrder[0];
+      for (let j = 1; j < iloOrder.length; j++) {
+        if (iloOrder[j]! < lastValid!) {
+          localErrors.push({
+            error: `Under CO ${i + 1}, ILO ${j + 1} should not have a taxonomy level lower than ILO ${j}'s.`,
+            row: firstIloAt.row,
+            column: firstIloAt.column + j,
+            from: this.name,
+          });
+          continue;
+        }
+        lastValid = iloOrder[j];
       }
     }
 
@@ -84,4 +86,4 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
   }
 }
 
-export default LastILOTaxo;
+export default ILOTaxoOrder;

@@ -50,4 +50,6 @@ await coaepDT.initializeTable(validCoaepCSV);
 const result = await coaepDT.validate();
 console.dir(result, { depth: null });
 
+// console.dir(await coaepDT.toJson(), { depth: null });
+
 console.log("=== All Tests Complete ===");

@@ -8,6 +8,7 @@ import extractFromObjective from "../../helper/extractFromObjective.helper";
 import { performaceTarget } from "../../helper/performaceTarget.helper";
 import LastILOTaxo from "./validators/coaep/LastILOtaxo";
 import { MinCOtaxo } from "./validators/coaep/MinCOtaxo";
+import ILOTaxoOrder from "./validators/coaep/ILOTaxoOrder";
 
 export class CoaepDT extends DataTable<COAEP> {
   faculty: string | null = null;
@@ -20,6 +21,7 @@ export class CoaepDT extends DataTable<COAEP> {
     this.name = "CoaepDT";
     this.useValidator(new LastILOTaxo());
     this.useValidator(new MinCOtaxo());
+    this.useValidator(new ILOTaxoOrder());
   }
 
   async fromCSVString(csvString: string): Promise<ParserResult<DataTableInfo>> {
