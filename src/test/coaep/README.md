@@ -1,76 +1,162 @@
-# COAEP Parser Testing Area
+# **DataTable Module Documentation**
 
-This directory contains test files and sample data for testing the COAEP parser functionality.
+The **DataTable Module** is a generic, type-safe framework designed to ingest tabular data (CSV/Excel), perform robust validation against business rules, and transform the data into structured JSON objects.  
+This documentation focuses on the **COAEP** (Course Outcome Assessment and Evaluation Plan) implementation, which converts raw curriculum map files into hierarchical TypeScript interfaces.
 
-## Files
+## ---
 
-- **coaep.test.ts** - Main test file with multiple test cases
-- **sample-coaep.csv** - Sample COAEP CSV file for manual testing
-- **interactive-test.ts** - Interactive testing script for loading and parsing CSV files
+**🚀 Usage Guide**
 
-## Running Tests
+The core workflow consists of three steps: **Initialize**, **Validate**, and **Convert**.
 
-**Note:** Use `tsx` instead of `ts-node` due to ESM module configuration.
+### **1\. Initialization**
 
-### Option 1: Run the test suite
+First, instantiate the specific DataTable implementation (e.g., CoaepDT) and load it with data. The data source can be a raw CSV string or a file object.
 
-```bash
-npx tsx src/test/coaep/coaep.test.ts
-```
+```TypeScript
 
-### Option 2: Interactive testing with sample CSV
+import { CoaepDT } from "./DataTable/models/CoaepDT";
 
-```bash
-npx tsx src/test/coaep/interactive-test.ts
-```
+// 1. Instantiate
+const coaepDT = new CoaepDT();
 
-### Option 3: Test with custom CSV file
+// 2. Initialize with CSV data (string)
+// Note: initializeTable() is async. You must wait for it.
+const result = await coaepDT.initializeTable(csvDataString);
 
-```bash
-npx tsx src/test/coaep/interactive-test.ts path/to/your/file.csv
-```
-
-## Test Cases Covered
-
-1. **Valid COAEP CSV** - Tests parsing of properly formatted COAEP data ✅
-2. **Missing Headers** - Tests error handling when headers are not found ✅
-3. **Incomplete Data** - Tests parsing with missing ILO/assessment information ✅
-4. **Empty String** - Tests behavior with empty input ✅
-5. **Structure Verification** - Validates the parsed output structure and data ✅
-
-All tests are passing successfully.
-
-## Expected Output Structure
-
-```typescript
-{
-  COAEP: {
-    faculty: string | null,
-    course: string | null,
-    sy: string | null,
-    semester: number | null,
-    co: [
-      {
-        statement: string,
-        verb: string,
-        ilo: [
-          {
-            statement: string,
-            verb: string,
-            assessment_tool: string,
-            performance_target: number | null,
-            passing_score: number | null
-          }
-        ]
-      }
-    ]
-  }
+if (!result.success) {
+ console.error("Failed to load table:", result.message);
 }
 ```
 
-## Notes
+### **2\. Fetching & Modifying Data**
 
-- The parser dynamically detects header rows
-- Performance targets are extracted from text (e.g., "80% of students will score 75%" → target: 80, score: 75)
-- Instructional verbs are automatically extracted from statements
-- Empty or malformed CSV files will return error objects
+You can retrieve the internal grid representation to display or edit raw values before final processing.
+
+```TypeScript
+
+// Fetch the current state of the table
+const tableResult = coaepDT.getTable();
+
+if (tableResult.success) {
+ const { headers, table } = tableResult.data;
+ console.log("Headers:", headers);
+
+    // Example: Modifying a cell (Row 0, Column 3)
+    // This is useful for fixing errors found during validation
+    table[0][3] = "Updated Assessment Tool";
+
+    // Commit changes back to the instance
+    await coaepDT.setTable(table);
+
+}
+```
+
+### **3\. Validation**
+
+Run the validation pipeline. This executes all registered validators (e.g., ensuring taxonomy alignment) and returns a comprehensive report of errors and success messages.
+
+```TypeScript
+
+const validationResult \= await coaepDT.validate();
+
+console.log(validationResult.message); // e.g. "CoaepDT ran its validations..."
+
+// Check for specific validation errors
+if (validationResult.data.tableErrors.length > 0) {
+ validationResult.data.tableErrors.forEach(err => {
+ // 'row' and 'column' point to the cell in the table
+ console.error(`Error at [${err.row}, ${err.column}]: ${err.error}\`);
+ });
+} else {
+ console.log("All validations passed!");
+}
+```
+
+### **4\. Conversion to JSON**
+
+Finally, transform the validated table into a structured object (COAEP interface).
+
+```TypeScript
+
+const jsonResult = await coaepDT.toJson();
+
+if (jsonResult.success) {
+ const coaepData = jsonResult.data.jsonObj;
+ console.log("Faculty:", coaepData.faculty);
+ console.log("First CO:", coaepData.co[0].statement);
+}
+```
+
+## ---
+
+**🏗️ Architecture**
+
+The system is built on a modular DataTable\<T\> abstract class.
+
+### **Core Components**
+
+| Component          | Description                                                                                                                                                   |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **DataTable\<T\>** | The abstract base class. Handles state management (table, headers), basic parsing logic, and the validation orchestration pipeline.                           |
+| **CoaepDT**        | Implementation for **COAEP**. Handles specific CSV structure parsing (header detection, merged cell handling) and NLP extraction (Taxonomy/Cognitive levels). |
+| **DTValidator**    | Strategy pattern for validation rules. Validators are "plugged in" to the DataTable instance to keep business logic separate from parsing logic.              |
+
+## ---
+
+**✅ COAEP Validation Rules**
+
+The CoaepDT comes pre-configured with the following business rules:
+
+1. **MinCOtaxo (Minimum CO Taxonomy)**
+   - **Rule:** A Course Outcome (CO) must have a taxonomy level of **Applying** or higher.
+   - **Error:** "Remembering" or "Understanding" at the CO level will flag an error.
+2. **LastILOTaxo (Outcome Alignment)**
+   - **Rule:** The _last_ Intended Learning Outcome (ILO) within a CO must match the taxonomy level of the CO itself.
+   - **Purpose:** Ensures the final step of the learning process meets the target outcome.
+3. **ILOTaxoOrder (Progressive Complexity)**
+   - **Rule:** ILOs within a single CO must be ordered by complexity.
+   - **Error:** An ILO cannot have a lower taxonomy level (e.g., _Remembering_) than the one preceding it (e.g., _Analyzing_).
+
+## ---
+
+**📦 Data Structures**
+
+The parser transforms the flat CSV grid into the following hierarchy:
+
+```TypeScript
+
+interface COAEP {
+ faculty: string | null;
+ course: string | null;
+ co: CO[]; // Array of Course Outcomes
+}
+
+interface CO {
+ statement: string;
+ taxonomy_level: string; // e.g. "creating"
+ ilo: ILO[]; // Array of Intended Learning Outcomes
+}
+
+interface ILO {
+ statement: string;
+ assessment_tool: string;
+ performance_target: number;
+ passing_score: number;
+ taxonomy_level: string; // e.g. "understanding"
+}
+```
+
+## ---
+
+**⚠️ Common Issues & Troubleshooting**
+
+- **"Datatable is unset"**: You must call await coaepDT.initializeTable(csv) before accessing data or running validations.
+- **Missing Headers**: The parser looks for specific keywords (e.g., "Course Outcome Statement") to identify the header row. Ensure the input file follows the standard COAEP template.
+- **Validation Errors**: Use the row and column properties in tableErrors to highlight the exact cell causing the issue in your UI.
+
+### ---
+
+**Next Steps for Implementation**
+
+Would you like me to generate the **Unit Tests** for the ILOTaxoOrder validator, or perhaps create a helper script to **validate CSV files from the CLI**?

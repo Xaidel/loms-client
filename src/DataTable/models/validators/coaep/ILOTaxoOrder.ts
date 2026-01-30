@@ -3,6 +3,7 @@ import DataTableException from "../../../types/DataTableException";
 import { CoaepDT } from "../../CoaepDT";
 import { DTValidator } from "../../DTValidator";
 
+// Hardcoded Order of taxonomy levels
 const taxoOrder: Record<string, number> = {
   remembering: 1,
   understanding: 2,
@@ -16,6 +17,18 @@ export class ILOTaxoOrder extends DTValidator<CoaepDT, COAEP> {
   constructor() {
     super("ILO_TAXO_ORDER");
   }
+
+  /**
+   * Validate the COAEP object.
+   * Checks if every Course Outcome has its ILOs in order of taxonomy level.
+   * If not, it will throw an error.
+   *
+   * @param {string[]} validMsgs - Array of valid messages.
+   * @param {DataTableException[]} tableErrors - Array of table errors.
+   * @param {CoaepDT} coaepDT - COAEP DataTable.
+   * @param {COAEP | null} coaepObj - COAEP object.
+   * @returns {Promise<void>} - Promise that resolves when validation is complete.
+   */
   async validate(
     validMsgs: string[],
     tableErrors: DataTableException[],
@@ -80,9 +93,7 @@ export class ILOTaxoOrder extends DTValidator<CoaepDT, COAEP> {
       }
     }
 
-    if (localErrors.length > 0) tableErrors.push(...localErrors);
-    else validMsgs.push(`${this.name} successfully validated.`);
-    return;
+    this.report(localErrors, validMsgs, tableErrors);
   }
 }
 

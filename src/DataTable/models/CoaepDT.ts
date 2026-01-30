@@ -16,9 +16,12 @@ export class CoaepDT extends DataTable<COAEP> {
   sy: string | null = null;
   semester: number | null = null;
 
+  /**
+   * Initializes the DataTable for COAEP.
+   * Also sets up custom validators for the DataTable.
+   */
   constructor() {
-    super();
-    this.name = "CoaepDT";
+    super("CoaepDT");
 
     // * Custom validators
 
@@ -30,6 +33,53 @@ export class CoaepDT extends DataTable<COAEP> {
 
     // The ILO's within a CO should be in order
     this.useValidator(new ILOTaxoOrder());
+  }
+
+  async validateFields(
+    validMsgs: string[],
+    tableErrors: DataTableException[],
+  ): Promise<void> {
+    const localErrors: DataTableException[] = [];
+
+    // track last values for mergeable fields
+    let lastNum: string | null = null;
+    let lastCOStmt: string | null = null;
+
+    for (let i = 0; i < this.table.length; i++) {
+      const missingIdxs: number[] = [];
+      const row = this.table[i]!;
+
+      const num: string | null = row[0]! || lastNum;
+      const coStmt: string | null = row[1]! || lastCOStmt;
+      const iloStmt = row[2];
+      const tool = row[3];
+      const target = row[4];
+
+      if (!num) missingIdxs.push(0);
+      if (!coStmt) missingIdxs.push(1);
+      if (!iloStmt) missingIdxs.push(2);
+      if (!tool) missingIdxs.push(3);
+      if (!target) missingIdxs.push(4);
+
+      if (lastCOStmt !== coStmt)
+        this.validateObjectiveGrammar(coStmt!, i, 1, tableErrors);
+
+      lastNum = num;
+      lastCOStmt = coStmt;
+
+      for (const j of missingIdxs) {
+        localErrors.push({
+          error: `Missing field: ${this.headers[j]}`,
+          row: i,
+          column: j,
+        });
+      }
+
+      if (iloStmt) this.validateObjectiveGrammar(iloStmt, i, 2, tableErrors);
+    }
+
+    if (localErrors.length > 0) tableErrors.push(...localErrors);
+    else validMsgs.push(`${this.name} successfully validated all fields.`);
   }
 
   async fromCSVString(csvString: string): Promise<ParserResult<DataTableInfo>> {
@@ -284,5 +334,38 @@ export class CoaepDT extends DataTable<COAEP> {
         },
       } as ParserResult;
     }
+  }
+
+  /**
+   * Local helper function that to validate grammar of a CO/ILO statement.
+   * Checks if the statement follows grammar to fetch the fields: cognitive level, taxonomy level, verb
+   *
+   * @param {string} stmt - The objective statement to validate.
+   * @param {number} row - The row of the statement in the table.
+   * @param {number} column - The column of the statement in the table.
+   * @param {DataTableException[]} tableErrors - The array of error messages to append to.
+   */
+  validateObjectiveGrammar(
+    stmt: string,
+    row: number,
+    column: number,
+    tableErrors: DataTableException[],
+  ): void {
+    const { cognitive_level, taxonomy_level, verb } =
+      extractFromObjective(stmt);
+
+    const missingFields = [];
+    if (!cognitive_level) missingFields.push("cognitive_level");
+    if (!taxonomy_level) missingFields.push("taxonomy_level");
+    if (!verb) missingFields.push("verb");
+
+    if (!missingFields.length) return;
+
+    tableErrors.push({
+      error: `Cannot find fields: ${missingFields.join(", ")}.`,
+      row,
+      column,
+      from: `${this.name.toUpperCase()}_OBJ_GRAMMAR`,
+    } as DataTableException);
   }
 }

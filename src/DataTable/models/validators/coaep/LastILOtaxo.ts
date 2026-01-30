@@ -8,6 +8,17 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
     super("LAST_ILO_TAXO");
   }
 
+  /**
+   * Validate the COAEP object.
+   * Checks if the last ILO of every CO has the same taxonomy level as the CO.
+   * If not, it will throw an error.
+   *
+   * @param {string[]} validMsgs - Array of valid messages.
+   * @param {DataTableException[]} tableErrors - Array of table errors.
+   * @param {CoaepDT} coaepDT - COAEP DataTable.
+   * @param {COAEP | null} coaepObj - COAEP object.
+   * @returns {Promise<void>} - Promise that resolves when validation is complete.
+   */
   async validate(
     validMsgs: string[],
     tableErrors: DataTableException[],
@@ -78,9 +89,7 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
       }
     }
 
-    if (localErrors.length > 0) tableErrors.push(...localErrors);
-    else validMsgs.push(`${this.name} successfully validated.`);
-    return;
+    this.report(localErrors, validMsgs, tableErrors);
   }
 }
 
