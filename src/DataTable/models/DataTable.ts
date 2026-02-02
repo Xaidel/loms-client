@@ -97,9 +97,11 @@ export abstract class DataTable<T> {
    * @param {File | string} data - The File or CSV string to initialize the DataTable from.
    * @returns A Promise that resolves to a ParserResult.
    */
-  async initializeTable(data: File | string): Promise<ParserResult> {
+  async initializeTable(
+    data: File | string,
+  ): Promise<ParserResult<DataTableInfo>> {
     try {
-      let parseResult;
+      let parseResult: ParserResult<DataTableInfo>;
 
       // case File
       if (data instanceof File) parseResult = await this.fromXML(data);
@@ -116,8 +118,8 @@ export abstract class DataTable<T> {
       // case success
       const { table: _table, headers: _headers } = parseResult.data;
 
-      this.table = _table;
-      this.headers = _headers;
+      this.table = _table satisfies (string | null)[][];
+      this.headers = _headers satisfies string[];
 
       return {
         success: true,
@@ -213,6 +215,7 @@ export abstract class DataTable<T> {
 
   /**
    * Runs all validators on the DataTable.
+   * By default runs the validations of the validateFields and toJson methods.
    * If any validator fails, it will append the error message to the tableErrors array.
    * If all validators pass, it will append the successful validation messages to the validMsgs array.
    *
@@ -278,16 +281,6 @@ export abstract class DataTable<T> {
   }
 
   /**
-   * Adds a validator to the DataTable.
-   * This validator will be called when the validate method is called.
-   *
-   * @param validator - The validator to add to the DataTable.
-   */
-  useValidator(validator: DTValidator<this, T>) {
-    this.validators.push(validator);
-  }
-
-  /**
    * Validates all fields in the DataTable.
    *
    * @param {string[]} validMsgs - Array of valid messages.
@@ -298,4 +291,14 @@ export abstract class DataTable<T> {
     validMsgs: string[],
     tableErrors: DataTableException[],
   ): Promise<void>;
+
+  /**
+   * Adds a custom validator to the DataTable.
+   * This validator will be called when the validate method is called.
+   *
+   * @param validator - The validator to add to the DataTable.
+   */
+  useValidator(validator: DTValidator<this, T>) {
+    this.validators.push(validator);
+  }
 }

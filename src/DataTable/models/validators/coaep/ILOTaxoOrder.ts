@@ -11,7 +11,7 @@ const taxoOrder: Record<string, number> = {
   analyzing: 4,
   evaluating: 5,
   creating: 6,
-};
+} as const;
 
 export class ILOTaxoOrder extends DTValidator<CoaepDT, COAEP> {
   constructor() {
