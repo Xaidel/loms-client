@@ -1,10 +1,11 @@
 import { COAEP } from "../../../../types/coaep";
 import DataTableException from "../../../types/DataTableException";
+import Taxonomy from "../../../../types/Taxonomy";
 import { CoaepDT } from "../../CoaepDT";
 import { DTValidator } from "../../DTValidator";
 
 // Hardcoded Order of taxonomy levels
-const taxoOrder: Record<string, number> = {
+const taxoOrder: Record<Taxonomy, number> = {
   remembering: 1,
   understanding: 2,
   applying: 3,
@@ -76,7 +77,9 @@ export class ILOTaxoOrder extends DTValidator<CoaepDT, COAEP> {
         row: number;
         column: number;
       } = await coaepDT.findValue(co.ilo[0]!.statement);
-      const iloOrder = co.ilo.map((ilo) => taxoOrder[ilo.taxonomy_level!]);
+      const iloOrder = co.ilo.map(
+        (ilo) => taxoOrder[ilo.taxonomy_level! as Taxonomy],
+      );
 
       let lastValid = iloOrder[0];
       for (let j = 1; j < iloOrder.length; j++) {

@@ -2,8 +2,14 @@ import { COAEP } from "../../../../types/coaep";
 import { CoaepDT } from "../../CoaepDT";
 import DataTableException from "../../../types/DataTableException";
 import { DTValidator } from "../../DTValidator";
+import Taxonomy from "../../../../types/Taxonomy";
 
-const invalidTaxos = ["remembering", "understanding"];
+const whitelist: Taxonomy[] = [
+  "applying",
+  "analyzing",
+  "evaluating",
+  "creating",
+];
 
 export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
   constructor() {
@@ -47,25 +53,19 @@ export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
         continue;
       }
 
-      for (const invalidTaxo of invalidTaxos) {
-        if (co.taxonomy_level === invalidTaxo) {
-          const { row, column } = await coaepDT.findValue(co.statement);
+      if (!whitelist.includes(co.taxonomy_level as Taxonomy)) {
+        const { row, column } = await coaepDT.findValue(co.statement);
+        let tbe = {
+          error: `Cannot have CO Taxonomy Level of lower than Applying: ${co.taxonomy_level.toUpperCase()}`,
+          from: this.name,
+        } as DataTableException;
 
-          let tbe = {
-            error: `Cannot have CO Taxonomy Level of lower than Applying: ${co.taxonomy_level.toUpperCase()}`,
-            from: this.name,
-          } as DataTableException;
-
-          if (row !== -1 || column !== -1) {
-            tbe = {
-              ...tbe,
-              row,
-              column,
-            } as DataTableException;
-          }
-
-          localErrors.push(tbe);
+        if (row !== -1 || column !== -1) {
+          tbe["row"] = row;
+          tbe["column"] = column;
         }
+
+        localErrors.push(tbe);
       }
     }
 

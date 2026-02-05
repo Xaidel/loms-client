@@ -1,3 +1,5 @@
+// npx tsx src\test\coaep\coaepDataTable.test.ts
+
 import * as fs from "fs";
 import * as path from "path";
 import * as XLSX from "xlsx";
@@ -34,34 +36,35 @@ if (fs.existsSync(sampleFilePath)) {
   console.error("Sample COAEP Excel file not found at:", sampleFilePath);
 }
 
-console.log("=== Test 1: Valid COAEP CSV ===");
+console.log("\n=== Test 1: Valid COAEP CSV ===");
 
 const coaepDT = new CoaepDT();
 
 // initialize with CSV
-await coaepDT.initializeTable(validCoaepCSV);
+console.log("\n== Initialize with CSV ===");
+console.dir(await coaepDT.initializeTable(validCoaepCSV), { depth: null });
 
 // Fetch table Data
-console.log("== Fetch Table Data ===");
+console.log("\n== Fetch Table Data ===");
 const result1 = coaepDT.getTable();
 console.dir(result1, { depth: null });
 
 // Update table data
-console.log("== Update Table Data ===");
+console.log("\n== Update Table Data ===");
 let table = result1.data!.table;
 table[0]![3] = "New Assessment tool";
 await coaepDT.setTable(table);
 let result2 = await coaepDT.toJson();
 console.dir(result2!.data!.jsonObj!.co[0]!.ilo[0], { depth: null });
 
-// validation
-console.log("== Validation ===");
+// validation;
+console.log("\n== Validation ===");
 const result3 = await coaepDT.validate();
 console.dir(result3, { depth: null });
 
 // Convert to JSON
-console.log("== Convert to JSON ===");
+console.log("\n== Convert to JSON ===");
 const result4 = await coaepDT.toJson();
 console.dir(result4, { depth: null });
 
-console.log("=== All Tests Complete ===");
+console.log("\n=== All Tests Complete ===");

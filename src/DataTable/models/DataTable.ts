@@ -4,29 +4,34 @@ import { ParserResult } from "../types/ParserResult";
 import DataTableException from "../types/DataTableException";
 import { DTValidator } from "./DTValidator";
 
-export type DataTableInfo = {
+export type DataTableInfo<RowType = any[]> = {
   name: string;
-  table: (string | null)[][];
   headers: string[];
+  table: RowType[];
 };
 
-export abstract class DataTable<T> {
+export abstract class DataTable<Obj, RowType> {
   protected name: string;
-  protected table: (string | null)[][] = [];
   protected headers: string[];
-  protected validators: DTValidator<this, T>[] = [];
+  protected table: RowType[];
+  protected validators: DTValidator<this, Obj>[] = [];
 
   /**
    * Creates a new DataTable, initializes default values.
    * If no name is given, the name defaults to "DataTable".
    *
+   * @template Obj - The type of the DataTable JSON output.
+   * @template RowType - The type of each row of the inner table.
+   *
    * @param {string} _name - The name of the DataTable. Defaults to "DataTable".
+   * @param {string[]} _headers - The headers of the DataTable.
    */
-  constructor(_name: string = "DataTable") {
+  constructor(_name: string = "DataTable", _headers: string[]) {
     this.name = _name;
+    this.headers = _headers;
+
     this.table = [];
-    this.headers = [];
-    this.validators = [] as DTValidator<this, T>[];
+    this.validators = [] as DTValidator<this, Obj>[];
   }
 
   /**
@@ -40,7 +45,6 @@ export abstract class DataTable<T> {
    * Returns the header names of the DataTable.
    * @returns array of strings
    */
-
   getHeaders(): string[] {
     return this.headers;
   }
@@ -49,7 +53,7 @@ export abstract class DataTable<T> {
    * Gets the DataTable from the current object.
    * @returns ParserResult<DataTableInfo>
    */
-  getTable(): ParserResult<DataTableInfo> {
+  getTable(): ParserResult<DataTableInfo<RowType>> {
     if (this.table.length === 0) {
       return {
         success: false,
@@ -62,10 +66,10 @@ export abstract class DataTable<T> {
       message: "Successfully fetched datatable.",
       data: {
         name: this.name,
-        table: this.table,
         headers: this.headers,
-      } satisfies DataTableInfo,
-    } as ParserResult<DataTableInfo>;
+        table: this.table,
+      } satisfies DataTableInfo<RowType>,
+    } as ParserResult<DataTableInfo<RowType>>;
   }
 
   /**
@@ -76,16 +80,16 @@ export abstract class DataTable<T> {
    * @param table - Internal table of type (string | null)[][].
    * @returns A Promise that resolves when the table has been set.
    */
-  async setTable(table: (string | null)[][]): Promise<void> {
+  async setTable(table: RowType[]): Promise<void> {
     await this.assertInitialized();
 
     // check if number of columns matches number of headers
-    if (table[0]!.length !== this.headers.length)
-      Promise.reject(
-        new Error("Number of columns does not match number of headers."),
-      );
+    // if (table[0]!.length !== this.headers.length)
+    //   Promise.reject(
+    //     new Error("Number of columns does not match number of headers."),
+    //   );
 
-    this.table = table satisfies (string | null)[][];
+    // this.table = table satisfies U[][];
   }
 
   /**
@@ -97,11 +101,9 @@ export abstract class DataTable<T> {
    * @param {File | string} data - The File or CSV string to initialize the DataTable from.
    * @returns A Promise that resolves to a ParserResult.
    */
-  async initializeTable(
-    data: File | string,
-  ): Promise<ParserResult<DataTableInfo>> {
+  async initializeTable(data: File | string): Promise<ParserResult<RowType[]>> {
     try {
-      let parseResult: ParserResult<DataTableInfo>;
+      let parseResult: ParserResult<RowType[]>;
 
       // case File
       if (data instanceof File) parseResult = await this.fromXML(data);
@@ -111,15 +113,12 @@ export abstract class DataTable<T> {
       // case error
       if (!parseResult.success || !parseResult.data) return parseResult;
 
-      if (parseResult.data.table.length === 0) {
+      if (parseResult.data.length === 0) {
         throw new Error("Cannot set an empty table.");
       }
 
       // case success
-      const { table: _table, headers: _headers } = parseResult.data;
-
-      this.table = _table satisfies (string | null)[][];
-      this.headers = _headers satisfies string[];
+      this.table = parseResult.data satisfies RowType[];
 
       return {
         success: true,
@@ -138,17 +137,14 @@ export abstract class DataTable<T> {
    * Asserts that the DataTable has been initialized.
    * If not, it throws a DataTableException.
    *
-   * @returns A Promise that resolves with a string message.
    * @throws {DataTableException} If the DataTable has not been initialized.
    */
-  async assertInitialized(): Promise<string> {
-    if (this.headers.length === 0)
-      throw {
-        error: `This ${this.name} is not initialized.`,
-        from: "ASSERT_INIT",
-      } as DataTableException;
-
-    return Promise.resolve("The table is initialized.");
+  async assertInitialized(): Promise<void> {
+    if (this.table.length === 0)
+      Promise.reject({
+        error: `${this.name} is unset.`,
+        from: `${this.name.toUpperCase()}_ASSERT_INIT`,
+      } as DataTableException);
   }
 
   /**
@@ -157,9 +153,7 @@ export abstract class DataTable<T> {
    * @param csvString - The CSV string to parse.
    * @returns A Promise that resolves to a ParserResult when the parsing is complete.
    */
-  abstract fromCSVString(
-    csvString: string,
-  ): Promise<ParserResult<DataTableInfo>>;
+  abstract fromCSVString(csvString: string): Promise<ParserResult<RowType[]>>;
 
   /**
    * Converts the DataTable to its JSON representation.
@@ -171,7 +165,7 @@ export abstract class DataTable<T> {
    */
   abstract toJson(): Promise<
     ParserResult<{
-      jsonObj: T | null;
+      jsonObj: Obj;
       validMsgs: string[];
       tableErrors: DataTableException[];
     }>
@@ -188,7 +182,7 @@ export abstract class DataTable<T> {
   async fromXML(
     xls: File,
     sheetName?: string,
-  ): Promise<ParserResult<DataTableInfo>> {
+  ): Promise<ParserResult<RowType[]>> {
     const csv: File = await convertToCSVFile(xls, sheetName);
     const csvString = await csv.text();
 
@@ -201,16 +195,30 @@ export abstract class DataTable<T> {
    * @param {string} str - The string to search for.
    * @returns {Promise<{ row: number; column: number }>} - A promise resolving to the indices. Defaults to {row: -1, column: -1} if not found.
    */
-  async findValue(str: string): Promise<{ row: number; column: number }> {
-    await this.assertInitialized();
+  async findValue(val: string | any): Promise<{ row: number; column: number }> {
+    let [row, column] = [-1, -1];
+    if (!val) return { row, column };
+
     for (let i = 0; i < this.table.length; i++) {
-      for (let j = 0; j < this.table[i]!.length; j++) {
-        if (this.table[i]![j] === str) {
-          return { row: i, column: j };
+      const row = this.table[i]! as RowType[];
+      for (let j = 0; j < row.length; j++) {
+        if (typeof val === "string") {
+          if ((row[j] as string) === val) return { row: i, column: j };
+        } else if (row[j] satisfies typeof val) {
+          if (row[j] === val) return { row: i, column: j };
         }
       }
     }
-    return { row: -1, column: -1 };
+    return { row, column };
+
+    // for (let i = 0; i < this.table.length; i++) {
+    //   for (let j = 0; j < this.table[i]!.length; j++) {
+    //     if (this.table[i]![j] === str) {
+    //       return { row: i, column: j };
+    //     }
+    //   }
+    // }
+    // return { row: -1, column: -1 };
   }
 
   /**
@@ -230,16 +238,14 @@ export abstract class DataTable<T> {
 
     try {
       await this.assertInitialized()
-        .then((msg: string) => {
-          validMsgs.push(msg);
+        .then(() => {
+          validMsgs.push("Table is initialized.");
         })
         .catch((error: DataTableException) => tableErrors.push(error));
 
       if (tableErrors.length > 0) throw "Cannot validate uninitialized table.";
 
       await this.validateFields(validMsgs, tableErrors);
-      // if (tableErrors.length > 0)
-      //   throw "Cannot convert to JSON with invalid fields.";
 
       const { success, message, error, data: toJsonData } = await this.toJson();
 
@@ -251,7 +257,7 @@ export abstract class DataTable<T> {
       const { jsonObj } = toJsonData;
 
       for (const validator of this.validators) {
-        await validator.validate(validMsgs, tableErrors, this, jsonObj as T);
+        await validator.validate(validMsgs, tableErrors, this, jsonObj as Obj);
       }
 
       let returnMsg = `${this.name} ran its validations.`;
@@ -298,7 +304,7 @@ export abstract class DataTable<T> {
    *
    * @param validator - The validator to add to the DataTable.
    */
-  useValidator(validator: DTValidator<this, T>) {
+  useValidator(validator: DTValidator<this, Obj>) {
     this.validators.push(validator);
   }
 }

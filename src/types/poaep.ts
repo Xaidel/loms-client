@@ -1,3 +1,7 @@
+export interface POAEP {
+  po: PO[];
+}
+
 export interface PO {
   po_desc: string;
   seq_no: number;

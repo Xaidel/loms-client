@@ -9,8 +9,17 @@ import { performaceTarget } from "../../helper/performaceTarget.helper";
 import LastILOTaxo from "./validators/coaep/LastILOtaxo";
 import { MinCOtaxo } from "./validators/coaep/MinCOtaxo";
 import ILOTaxoOrder from "./validators/coaep/ILOTaxoOrder";
+import { MinPerfTarget } from "./validators/coaep/MinPerfTarget";
 
-export class CoaepDT extends DataTable<COAEP> {
+export type CoaepRow = [
+  string | null, // CO No
+  string | null, // CO Statement
+  string | null, // ILO Statement
+  string | null, // AT
+  [number | null, number | null], // PerfTarget and PassingScore
+];
+
+export class CoaepDT extends DataTable<COAEP, CoaepRow> {
   faculty: string | null = null;
   course: string | null = null;
   sy: string | null = null;
@@ -21,7 +30,13 @@ export class CoaepDT extends DataTable<COAEP> {
    * Also sets up custom validators for the DataTable.
    */
   constructor() {
-    super("CoaepDT");
+    super("CoaepDT", [
+      "No.",
+      "Course Outcome Statement",
+      "Intended Learning Outcome",
+      "Assessment Tool",
+      "Performance Target",
+    ]);
 
     // * Custom validators
 
@@ -33,6 +48,9 @@ export class CoaepDT extends DataTable<COAEP> {
 
     // The ILO's within a CO should be in order
     this.useValidator(new ILOTaxoOrder());
+
+    // The PerformanceTarget and PassingScore must not go below 50
+    this.useValidator(new MinPerfTarget());
   }
 
   async validateFields(
@@ -49,11 +67,11 @@ export class CoaepDT extends DataTable<COAEP> {
       const missingIdxs: number[] = [];
       const row = this.table[i]!;
 
-      const num: string | null = row[0]! || lastNum;
-      const coStmt: string | null = row[1]! || lastCOStmt;
+      const num: string | null = row[0] || lastNum;
+      const coStmt: string | null = (row[1]! as string | null) || lastCOStmt;
       const iloStmt = row[2];
       const tool = row[3];
-      const target = row[4];
+      const target = row[4] as (number | null)[];
 
       if (!num) missingIdxs.push(0);
       if (!coStmt) missingIdxs.push(1);
@@ -75,38 +93,25 @@ export class CoaepDT extends DataTable<COAEP> {
         });
       }
 
-      if (iloStmt) this.validateObjectiveGrammar(iloStmt, i, 2, tableErrors);
+      if (iloStmt)
+        this.validateObjectiveGrammar(iloStmt as string, i, 2, tableErrors);
     }
 
     if (localErrors.length > 0) tableErrors.push(...localErrors);
     else validMsgs.push(`${this.name} successfully validated all fields.`);
   }
 
-  async fromCSVString(csvString: string): Promise<ParserResult<DataTableInfo>> {
+  async fromCSVString(csvString: string): Promise<ParserResult<CoaepRow[]>> {
     try {
-      const info = {
-        name: this.name,
-        table: [],
-        headers: [],
-        types: [],
-      } as DataTableInfo;
+      const table: CoaepRow[] = [];
 
       const rows: string[][] = Papa.parse<string[]>(csvString, {
         skipEmptyLines: false,
       }).data as string[][];
 
-      info.headers = [
-        "No.",
-        "Course Outcome Statement",
-        "Intended Learning Outcome",
-        "Assessment Tool",
-        "Performance Target",
-      ];
-
       const { headerRowIndex, coIdx, iloIdx, assessToolIdx, perfTargetIdx } =
         getCoaepHeader(rows);
 
-      // Validation: If headers aren't found, you might want to throw an error or use defaults
       if (headerRowIndex === -1)
         throw new Error(
           "Could not auto-detect header row. Please ensure the CSV file is in the correct COAEP format.",
@@ -150,13 +155,18 @@ export class CoaepDT extends DataTable<COAEP> {
           coState = row[coIdx + 1]?.trim() || "";
         }
 
+        const perfTargetCell =
+          row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
+        const { performance_target, passing_score } =
+          performaceTarget(perfTargetCell);
+
         if (row[iloIdx])
-          info.table.push([
+          table.push([
             coNum,
             coState,
             row[iloIdx]?.trim() || "",
             row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "").trim() || "",
-            row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "",
+            [performance_target, passing_score],
           ]);
         else break;
       }
@@ -164,7 +174,7 @@ export class CoaepDT extends DataTable<COAEP> {
       return {
         success: true,
         message: "Successfully converted COAEP datatable.",
-        data: info,
+        data: table,
       };
     } catch (error) {
       return {
@@ -177,7 +187,7 @@ export class CoaepDT extends DataTable<COAEP> {
 
   async toJson(): Promise<
     ParserResult<{
-      jsonObj: COAEP | null;
+      jsonObj: COAEP;
       validMsgs: string[];
       tableErrors: DataTableException[];
     }>
@@ -198,7 +208,7 @@ export class CoaepDT extends DataTable<COAEP> {
 
       let currentCO: CO | null = null;
       let lastAT = "";
-      let lastPT = "";
+      let lastPT: (number | null)[] = [null, null];
 
       this.table.forEach((row, i) => {
         // if empty co statement at first row, push error
@@ -213,14 +223,14 @@ export class CoaepDT extends DataTable<COAEP> {
         // if new CO, flush stored values
         if (row[1]) {
           lastAT = "";
-          lastPT = "";
+          lastPT = [null, null];
         }
 
         // fetch row data
-        const co = row[1] as string | null;
-        const ilo = row[2] as string;
+        const co = row[1]! as string;
+        const ilo = row[2]! as string;
         const assessTool = (row[3] || lastAT) as string;
-        const perfTarget = (row[4] || lastPT) as string;
+        const perfTarget = (row[4] || lastPT) as (number | null)[];
 
         // if empty ilo, push error
         if (!ilo)
@@ -272,8 +282,7 @@ export class CoaepDT extends DataTable<COAEP> {
           verb: iloVerb,
         } = extractFromObjective(ilo);
 
-        const { performance_target, passing_score } =
-          performaceTarget(perfTarget);
+        const [performance_target, passing_score] = perfTarget;
 
         // generate new ilo
         const newILO = {
