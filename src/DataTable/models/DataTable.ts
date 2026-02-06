@@ -101,12 +101,16 @@ export abstract class DataTable<Obj, RowType> {
    * @param {File | string} data - The File or CSV string to initialize the DataTable from.
    * @returns A Promise that resolves to a ParserResult.
    */
-  async initializeTable(data: File | string): Promise<ParserResult<RowType[]>> {
+  async initializeTable(
+    data: File | string,
+    sheetName?: string,
+  ): Promise<ParserResult<RowType[]>> {
     try {
       let parseResult: ParserResult<RowType[]>;
 
       // case File
-      if (data instanceof File) parseResult = await this.fromXML(data);
+      if (data instanceof File)
+        parseResult = await this.fromXML(data, sheetName);
       // case CSV String
       else parseResult = await this.fromCSVString(data);
 

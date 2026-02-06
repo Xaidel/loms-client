@@ -1,46 +1,52 @@
+import Taxonomy from "../types/Taxonomy";
+
 export default function extractFromObjective(objective: string): {
   cognitive_level: "I" | "E" | "D" | null;
-  taxonomy_level: string | null;
+  taxonomy_level: Taxonomy | null;
   verb: string | null;
+  rest: string | null;
 } {
   const result = {
     cognitive_level: null as "I" | "E" | "D" | null,
-    taxonomy_level: null as string | null,
+    taxonomy_level: null as Taxonomy | null,
     verb: null as string | null,
+    rest: objective.trim() as string | null,
   };
 
-  // Extract Cognitive Level and Taxonomy Level then text after the colon
-  const mainRegex = /(?:\(([IED])\))?\s*(\w+)\s*:\s*(.*)/i;
-  const match = objective.match(mainRegex);
+  // Extract cognitive level from rest if existing
+  const cognitiveLevelMatch = objective.match(/^\((I|E|D)\)/);
+  if (cognitiveLevelMatch) {
+    result.cognitive_level = cognitiveLevelMatch[1] as "I" | "E" | "D";
+    result.rest = objective.slice(cognitiveLevelMatch[0].length).trim();
+  }
 
-  if (match) {
-    // Cognitive Level: (I)/(E)/(D)
-    if (match[1]) result.cognitive_level = match[1] as "I" | "E" | "D";
+  // Extract taxonomy level as the word before colon, else no taxonomy level
+  const taxonomyLevelMatch = result.rest?.match(/^(.*?)\:/);
+  if (taxonomyLevelMatch) {
+    result.taxonomy_level =
+      (taxonomyLevelMatch[1]!.trim().toLowerCase() as Taxonomy) || null;
+    result.rest =
+      result.rest?.slice(taxonomyLevelMatch[0].length).trim() || null;
+  }
 
-    // Taxonomy Level: word before colon
-    if (match[2]) result.taxonomy_level = match[2].toLowerCase();
+  // Extract verb from rest as word following the keywords shall/will
+  const verbMatch = result.rest?.match(/(?:shall|will)\s+([a-zA-Z-]+)/);
 
-    // The rest of the string
-    const afterColon = match[3]?.trim();
+  if (verbMatch) {
+    result.verb = verbMatch[1]!.trim().toLowerCase() || null;
+  }
 
-    if (afterColon) {
-      // Look for "has" or "will" followed by the verb
-      const verbRegex = /(?:shall|will)\s+(\w+)/i;
-      const verbMatch = afterColon.match(verbRegex);
-
-      if (verbMatch) {
-        // Take the word right after has/will
-        result.verb = verbMatch[1]!.toLowerCase();
-      } else {
-        // Else take the first word after the colon
-        result.verb = afterColon.split(/\s+/)[0]!.toLowerCase();
-      }
-    }
+  // Else pick first word
+  else {
+    const firstWordMatch = result.rest?.match(/^\w+/);
+    if (firstWordMatch)
+      result.verb = firstWordMatch[0]!.trim().toLowerCase() || null;
   }
 
   return result;
 }
-// const sampleObj =
-//   "(I) REMEMBERING: Identify the fundamental web concepts, including how the web works, web History, and the purpose of web technologies.";
+
+const sampleObj =
+  "(I) REMEMBERING: Identify the fundamental web concepts, including how the web works, web History, and the purpose of web technologies.";
 
 // console.log(extractFromObjective(sampleObj));

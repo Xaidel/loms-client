@@ -10,14 +10,18 @@ import LastILOTaxo from "./validators/coaep/LastILOtaxo";
 import { MinCOtaxo } from "./validators/coaep/MinCOtaxo";
 import ILOTaxoOrder from "./validators/coaep/ILOTaxoOrder";
 import { MinPerfTarget } from "./validators/coaep/MinPerfTarget";
+import { CoaepDT_CO, CoaepDT_ILO, CoaepRow } from "../types/CoaepDTRow";
 
-export type CoaepRow = [
-  string | null, // CO No
-  string | null, // CO Statement
-  string | null, // ILO Statement
-  string | null, // AT
-  [number | null, number | null], // PerfTarget and PassingScore
-];
+/**
+ * Represents a row in the COAEP DataTable.
+ *
+ * @return row - Represents a full row of the internal table of the COAEP Data Table
+ * @return {string|null } row [0] - Co Number, Nullable
+ * @return {[string | null, string | null, string | null, string | null] | null} row [1] - [CO Cognitive Level, Taxonomy Level, Verb, Statement], nullable
+ * @return {[string | null, string | null, string | null, string | null] | null} row [2] - [ILO Cognitive Level, Taxonomy Level, Verb, Statement]
+ * @return {string|null } row [3] - Assessment Tool
+ * @return {[number | null, number | null] | null} row [4] - [PerfTarget, PassingScore]
+ */
 
 export class CoaepDT extends DataTable<COAEP, CoaepRow> {
   faculty: string | null = null;
@@ -61,29 +65,33 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
 
     // track last values for mergeable fields
     let lastNum: string | null = null;
-    let lastCOStmt: string | null = null;
+    let lastCoArr:
+      | [string | null, string | null, string | null, string | null]
+      | null = null;
 
     for (let i = 0; i < this.table.length; i++) {
       const missingIdxs: number[] = [];
       const row = this.table[i]!;
 
       const num: string | null = row[0] || lastNum;
-      const coStmt: string | null = (row[1]! as string | null) || lastCOStmt;
-      const iloStmt = row[2];
+      const coArr:
+        | [string | null, string | null, string | null, string | null]
+        | null = row[1] || lastCoArr;
+      const iloArr = row[2];
       const tool = row[3];
       const target = row[4] as (number | null)[];
 
       if (!num) missingIdxs.push(0);
-      if (!coStmt) missingIdxs.push(1);
-      if (!iloStmt) missingIdxs.push(2);
+      if (!lastCoArr) missingIdxs.push(1);
+      if (!iloArr) missingIdxs.push(2);
       if (!tool) missingIdxs.push(3);
       if (!target) missingIdxs.push(4);
 
-      if (lastCOStmt !== coStmt)
-        this.validateObjectiveGrammar(coStmt!, i, 1, tableErrors);
+      if (lastCoArr !== coArr)
+        this.validateObjectiveGrammar(coArr, i, 1, tableErrors);
 
       lastNum = num;
-      lastCOStmt = coStmt;
+      lastCoArr = coArr;
 
       for (const j of missingIdxs) {
         localErrors.push({
@@ -93,8 +101,7 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
         });
       }
 
-      if (iloStmt)
-        this.validateObjectiveGrammar(iloStmt as string, i, 2, tableErrors);
+      if (iloArr) this.validateObjectiveGrammar(iloArr, i, 2, tableErrors);
     }
 
     if (localErrors.length > 0) tableErrors.push(...localErrors);
@@ -146,8 +153,12 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
 
         if (rowIndex <= headerRowIndex) continue;
 
+        // break if ilo does not exist
+        if (!row[iloIdx]) break;
+
         let coNum = row[coIdx - 1]?.trim() || "";
         let coState = row[coIdx]?.trim() || "";
+        let iloState = row[iloIdx]?.trim() || "";
 
         // If coIdx contains a number, use format 2
         if (/^\d+$/.test(row[coIdx]?.trim() || "")) {
@@ -155,20 +166,34 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
           coState = row[coIdx + 1]?.trim() || "";
         }
 
+        // extract CO array info if co exists
+        let coArr = null;
+        if (coState) {
+          const { cognitive_level, taxonomy_level, verb, rest } =
+            extractFromObjective(coState);
+          coArr = [cognitive_level, taxonomy_level, verb, rest];
+        }
+
+        // extract ILO array info if ilo exists
+        let iloArr;
+        {
+          const { cognitive_level, taxonomy_level, verb, rest } =
+            extractFromObjective(iloState);
+          iloArr = [cognitive_level, taxonomy_level, verb, rest];
+        }
+
         const perfTargetCell =
           row[perfTargetIdx]?.replace(/\s+/g, " ").trim() || "";
         const { performance_target, passing_score } =
           performaceTarget(perfTargetCell);
 
-        if (row[iloIdx])
-          table.push([
-            coNum,
-            coState,
-            row[iloIdx]?.trim() || "",
-            row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "").trim() || "",
-            [performance_target, passing_score],
-          ]);
-        else break;
+        table.push([
+          coNum,
+          coArr as CoaepDT_CO,
+          iloArr as CoaepDT_ILO,
+          row[assessToolIdx]?.replace(/^ILO\d+[:.]?\s*/, "").trim() || "",
+          [performance_target, passing_score],
+        ]);
       }
 
       return {
@@ -227,13 +252,13 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
         }
 
         // fetch row data
-        const co = row[1]! as string;
-        const ilo = row[2]! as string;
+        const coArr = row[1]!;
+        const iloArr = row[2];
         const assessTool = (row[3] || lastAT) as string;
         const perfTarget = (row[4] || lastPT) as (number | null)[];
 
         // if empty ilo, push error
-        if (!ilo)
+        if (!iloArr)
           tableErrors.push({
             error: "Cannot have empty ILO.",
             row: 1,
@@ -260,12 +285,11 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
           });
 
         // if new co, generate new co
-        if (row[1]) {
-          const { cognitive_level, taxonomy_level, verb } =
-            extractFromObjective(co!);
+        if (coArr) {
+          const [cognitive_level, taxonomy_level, verb, rest] = coArr;
 
           const newCO = {
-            statement: co,
+            statement: rest,
             ilo: [],
             taxonomy_level,
             cognitive_level,
@@ -276,17 +300,13 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
           COAEP.co.push(newCO);
         }
 
-        const {
-          cognitive_level: iloCognitiveLevel,
-          taxonomy_level: iloTaxonomyLevel,
-          verb: iloVerb,
-        } = extractFromObjective(ilo);
+        const [iloCognitiveLevel, iloTaxonomyLevel, iloVerb, iloRest] = iloArr;
 
         const [performance_target, passing_score] = perfTarget;
 
         // generate new ilo
         const newILO = {
-          statement: ilo,
+          statement: iloRest,
           assessment_tool: assessTool,
           performance_target,
           passing_score,
@@ -349,19 +369,30 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
    * Local helper function that to validate grammar of a CO/ILO statement.
    * Checks if the statement follows grammar to fetch the fields: cognitive level, taxonomy level, verb
    *
-   * @param {string} stmt - The objective statement to validate.
+   * @param {[null | string, null | string, null | string, null | string] | null} objectiveArr - Array containing the parsed objective statement to validate.
    * @param {number} row - The row of the statement in the table.
    * @param {number} column - The column of the statement in the table.
    * @param {DataTableException[]} tableErrors - The array of error messages to append to.
    */
   validateObjectiveGrammar(
-    stmt: string,
+    objectiveArr:
+      | [string | null, string | null, string | null, string | null]
+      | null,
     row: number,
     column: number,
     tableErrors: DataTableException[],
   ): void {
-    const { cognitive_level, taxonomy_level, verb } =
-      extractFromObjective(stmt);
+    if (!objectiveArr) {
+      tableErrors.push({
+        error: "Cannot find objective statement.",
+        row,
+        column,
+        from: `${this.name.toUpperCase()}_OBJ_GRAMMAR`,
+      });
+      return;
+    }
+
+    const [cognitive_level, taxonomy_level, verb, rest] = objectiveArr!;
 
     const missingFields = [];
     if (!cognitive_level) missingFields.push("cognitive_level");

@@ -1,18 +1,8 @@
 import { COAEP } from "../../../../types/coaep";
 import DataTableException from "../../../types/DataTableException";
-import Taxonomy from "../../../../types/Taxonomy";
+import Taxonomy, { taxoOrder } from "../../../../types/Taxonomy";
 import { CoaepDT } from "../../CoaepDT";
 import { DTValidator } from "../../DTValidator";
-
-// Hardcoded Order of taxonomy levels
-const taxoOrder: Record<Taxonomy, number> = {
-  remembering: 1,
-  understanding: 2,
-  applying: 3,
-  analyzing: 4,
-  evaluating: 5,
-  creating: 6,
-} as const;
 
 export class ILOTaxoOrder extends DTValidator<CoaepDT, COAEP> {
   constructor() {
