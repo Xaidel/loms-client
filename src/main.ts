@@ -7,6 +7,7 @@ import { uploadAssessmentData } from "./relay/uploadAssessmentData";
 import { uploadDeptFaculty } from "./relay/uploadDeptFaculty";
 import { uploadPOAEP } from "./relay/uploadPOAEP";
 import { CoaepDT } from "./DataTable/models/CoaepDT";
+import { PoaepDT } from "./DataTable/models/PoaepDT";
 
 export default class Client {
   private BASE_URL: string;
@@ -84,10 +85,11 @@ export default class Client {
       },
 
       /**
-       * Functions that parse then return the payload
-       * instead of directly calling the backend and returning the response
+       * DataTable Classes
+       * Used to interface the excel table data, to validate it, and to convert it to object for uploading
        */
       CoaepDT,
+      PoaepDT,
     };
   }
 }

@@ -8,6 +8,7 @@ export type DataTableInfo<RowType = any[]> = {
   name: string;
   headers: string[];
   table: RowType[];
+  state: Record<string, any>;
 };
 
 export abstract class DataTable<Obj, RowType> {
@@ -15,6 +16,7 @@ export abstract class DataTable<Obj, RowType> {
   protected headers: string[];
   protected table: RowType[];
   protected validators: DTValidator<this, Obj>[] = [];
+  protected state: Record<string, any> = {};
 
   /**
    * Creates a new DataTable, initializes default values.
@@ -32,6 +34,7 @@ export abstract class DataTable<Obj, RowType> {
 
     this.table = [];
     this.validators = [] as DTValidator<this, Obj>[];
+    this.state = {};
   }
 
   /**
@@ -48,6 +51,23 @@ export abstract class DataTable<Obj, RowType> {
   getHeaders(): string[] {
     return this.headers;
   }
+
+  /**
+   * Returns the state of the DataTable.
+   * @returns Record<string, any>
+   */
+  getState(): Record<string, any> {
+    return this.state;
+  }
+
+  /**
+   * Sets the state of the DataTable.
+   * @param state - Record<string, any>
+   */
+  setState = async (state: Record<string, any>) => {
+    await this.assertInitialized();
+    this.state = state;
+  };
 
   /**
    * Gets the DataTable from the current object.
@@ -68,6 +88,7 @@ export abstract class DataTable<Obj, RowType> {
         name: this.name,
         headers: this.headers,
         table: this.table,
+        state: this.state,
       } satisfies DataTableInfo<RowType>,
     } as ParserResult<DataTableInfo<RowType>>;
   }
@@ -83,13 +104,7 @@ export abstract class DataTable<Obj, RowType> {
   async setTable(table: RowType[]): Promise<void> {
     await this.assertInitialized();
 
-    // check if number of columns matches number of headers
-    // if (table[0]!.length !== this.headers.length)
-    //   Promise.reject(
-    //     new Error("Number of columns does not match number of headers."),
-    //   );
-
-    // this.table = table satisfies U[][];
+    this.table = table;
   }
 
   /**

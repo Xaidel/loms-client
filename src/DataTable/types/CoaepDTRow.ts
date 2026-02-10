@@ -33,9 +33,19 @@ export type CoaepDT_ILO = [
 export type CoaepDT_AT = string | null;
 
 /**
+ * Represents the Performance Target column in the internal COAEP DataTable.
+ */
+export type CoaepDT_Perf = number | null;
+
+/**
+ * Represents the Passing Score column in the internal COAEP DataTable.
+ */
+export type CoaepDT_Pass = number | null;
+
+/**
  * Represents the Performance Target and Passing Score tuple column in the internal COAEP DataTable.
  * */
-export type CoaepDT_PT = [number | null, number | null];
+export type CoaepDT_PT = [CoaepDT_Perf, CoaepDT_Pass];
 
 /**
  * Represents a row in the internal COAEP DataTable.

@@ -97,6 +97,7 @@ const parsePOAEP = (csvString: string) => {
           cognitive_level: 0,
         })),
         SummativeCourse: { course_id: sc },
+        TaxonomyLevel: null,
         AssessmentTool: { at_desc: at },
         PerformanceTargets: {
           target_percent: ptArr.performance_target,
