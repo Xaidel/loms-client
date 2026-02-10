@@ -1,3 +1,5 @@
+import Taxonomy from "./Taxonomy";
+
 export interface POAEP {
   po: PO[];
 }
@@ -14,13 +16,14 @@ export interface PerfIndicator {
   SummativeCourse: PISummative;
   AssessmentTool: PIAssessmentTool;
   PerformanceTargets: PIPerfTarget;
+  TaxonomyLevel: PITaxonomyLevel | null;
 }
 
 // changes with curri_id
 
 export interface PIFormative {
   course_id: string;
-  cognitive_level: number;
+  cognitive_level: number | null;
 }
 
 export interface PISummative {
@@ -34,4 +37,8 @@ export interface PIAssessmentTool {
 export interface PIPerfTarget {
   target_percent: number;
   min_score: number;
+}
+
+export interface PITaxonomyLevel {
+  label: Taxonomy;
 }

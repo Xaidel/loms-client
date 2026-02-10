@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 import { CO, COAEP, ILO } from "../../types/coaep";
-import { DataTable, DataTableInfo } from "./DataTable";
+import { DataTable } from "./DataTable";
 import { ParserResult } from "../types/ParserResult";
 import getCoaepHeader from "../../helper/header-getter/getCoaepHeader";
 import DataTableException from "../types/DataTableException";
@@ -12,35 +12,29 @@ import ILOTaxoOrder from "./validators/coaep/ILOTaxoOrder";
 import { MinPerfTarget } from "./validators/coaep/MinPerfTarget";
 import { CoaepDT_CO, CoaepDT_ILO, CoaepRow } from "../types/CoaepDTRow";
 
-/**
- * Represents a row in the COAEP DataTable.
- *
- * @return row - Represents a full row of the internal table of the COAEP Data Table
- * @return {string|null } row [0] - Co Number, Nullable
- * @return {[string | null, string | null, string | null, string | null] | null} row [1] - [CO Cognitive Level, Taxonomy Level, Verb, Statement], nullable
- * @return {[string | null, string | null, string | null, string | null] | null} row [2] - [ILO Cognitive Level, Taxonomy Level, Verb, Statement]
- * @return {string|null } row [3] - Assessment Tool
- * @return {[number | null, number | null] | null} row [4] - [PerfTarget, PassingScore]
- */
+export const coaepHeaders = [
+  "No.",
+  "Course Outcome Statement",
+  "Intended Learning Outcome",
+  "Assessment Tool",
+  "Performance Target",
+];
 
 export class CoaepDT extends DataTable<COAEP, CoaepRow> {
-  faculty: string | null = null;
-  course: string | null = null;
-  sy: string | null = null;
-  semester: number | null = null;
-
   /**
    * Initializes the DataTable for COAEP.
    * Also sets up custom validators for the DataTable.
    */
   constructor() {
-    super("CoaepDT", [
-      "No.",
-      "Course Outcome Statement",
-      "Intended Learning Outcome",
-      "Assessment Tool",
-      "Performance Target",
-    ]);
+    super("CoaepDT", coaepHeaders);
+
+    // * State
+    this.state = {
+      faculty: null as string | null,
+      course: null as string | null,
+      sy: null as string | null,
+      semester: null as number | null,
+    };
 
     // * Custom validators
 
@@ -61,6 +55,11 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
     validMsgs: string[],
     tableErrors: DataTableException[],
   ): Promise<void> {
+    await this.assertInitialized().catch((error) => {
+      tableErrors.push(error);
+      return;
+    });
+
     const localErrors: DataTableException[] = [];
 
     // track last values for mergeable fields
@@ -82,7 +81,7 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
       const target = row[4] as (number | null)[];
 
       if (!num) missingIdxs.push(0);
-      if (!lastCoArr) missingIdxs.push(1);
+      if (!coArr) missingIdxs.push(1);
       if (!iloArr) missingIdxs.push(2);
       if (!tool) missingIdxs.push(3);
       if (!target) missingIdxs.push(4);
@@ -132,18 +131,20 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
         const semesterIdx = row.indexOf("Semester");
 
         if (facName !== -1) {
-          this.faculty = row[facName + 1]?.trim() || this.faculty;
+          this.state.faculty = row[facName + 1]?.trim() || this.state.faculty;
         }
         if (schoolYear !== -1) {
-          this.sy = row[schoolYear + 1]?.trim() || this.sy;
+          this.state.sy = row[schoolYear + 1]?.trim() || this.state.sy;
         }
         if (courseIdx !== -1) {
-          this.course = row[courseIdx + 1]?.trim() || this.course;
+          this.state.course = row[courseIdx + 1]?.trim() || this.state.course;
         }
         if (semesterIdx !== -1) {
           const semStr = row[semesterIdx + 1]?.trim() || "";
           const semNum = semStr.match(/\d+/)?.[0];
-          this.semester = semNum ? parseInt(semNum, 10) : this.semester;
+          this.state.semester = semNum
+            ? parseInt(semNum, 10)
+            : this.state.semester;
         }
       });
 
@@ -224,10 +225,10 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
       await this.assertInitialized();
 
       const COAEP = {
-        faculty: this.faculty,
-        course: this.course,
-        sy: this.sy,
-        semester: this.semester,
+        faculty: this.state.faculty,
+        course: this.state.course,
+        sy: this.state.sy,
+        semester: this.state.semester,
         co: [],
       } as COAEP;
 
@@ -326,7 +327,7 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
         } as DataTableException);
 
         return {
-          success: false,
+          success: true,
           message: "Converted COAEP datatable to JSON, but with errors.",
           data: {
             jsonObj: COAEP,
@@ -395,9 +396,9 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
     const [cognitive_level, taxonomy_level, verb, rest] = objectiveArr!;
 
     const missingFields = [];
-    if (!cognitive_level) missingFields.push("cognitive_level");
-    if (!taxonomy_level) missingFields.push("taxonomy_level");
-    if (!verb) missingFields.push("verb");
+    if (!cognitive_level) missingFields.push("Cognitive Level");
+    if (!taxonomy_level) missingFields.push("Taxonomy Level");
+    if (!verb) missingFields.push("Verb");
 
     if (!missingFields.length) return;
 
