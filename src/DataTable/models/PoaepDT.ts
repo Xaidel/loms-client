@@ -17,6 +17,8 @@ import {
 } from "../types/PoaepDTRow";
 import Taxonomy from "../../types/Taxonomy";
 import { performaceTarget } from "../../helper/performaceTarget.helper";
+import { MinPItaxo } from "./validators/poaep/MinPItaxo";
+import { MinPIPerfTarget } from "./validators/poaep/MinPIPerfTarget";
 
 export const poaepHeaders = [
   "Program Outcome",
@@ -40,6 +42,14 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
     this.state = {
       program: null as string | null,
     };
+
+    // * Custom validators
+
+    // PI's taxo should be Applying or higher
+    this.useValidator(new MinPItaxo());
+
+    // The PerformanceTarget and PassingScore must not go below 50
+    this.useValidator(new MinPIPerfTarget());
   }
 
   async fromCSVString(csvString: string): Promise<ParserResult<PoaepRow[]>> {

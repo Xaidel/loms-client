@@ -9,8 +9,8 @@ import { performaceTarget } from "../../helper/performaceTarget.helper";
 import LastILOTaxo from "./validators/coaep/LastILOtaxo";
 import { MinCOtaxo } from "./validators/coaep/MinCOtaxo";
 import ILOTaxoOrder from "./validators/coaep/ILOTaxoOrder";
-import { MinPerfTarget } from "./validators/coaep/MinPerfTarget";
 import { CoaepDT_CO, CoaepDT_ILO, CoaepRow } from "../types/CoaepDTRow";
+import { MinILOPerfTarget } from "./validators/coaep/MinILOPerfTarget";
 
 export const coaepHeaders = [
   "No.",
@@ -48,7 +48,7 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
     this.useValidator(new ILOTaxoOrder());
 
     // The PerformanceTarget and PassingScore must not go below 50
-    this.useValidator(new MinPerfTarget());
+    this.useValidator(new MinILOPerfTarget());
   }
 
   async validateFields(

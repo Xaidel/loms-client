@@ -19,7 +19,6 @@ export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
   /**
    * Validate the COAEP object.
    * Checks if every Course Outcome has a taxonomy level of "Applying" or higher.
-   * This is done by checking for "Remembering" and "Understanding" as errors.
    *
    * @param {string[]} validMsgs - Array of valid messages.
    * @param {DataTableException[]} tableErrors - Array of table errors.

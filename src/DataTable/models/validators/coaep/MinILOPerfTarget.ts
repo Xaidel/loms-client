@@ -6,10 +6,21 @@ import { DTValidator } from "../../DTValidator";
 const minPerfTarget = 50;
 const minPassScore = 50;
 
-export class MinPerfTarget extends DTValidator<CoaepDT, COAEP> {
+export class MinILOPerfTarget extends DTValidator<CoaepDT, COAEP> {
   constructor() {
-    super("MIN_PERF_TARGET");
+    super("MIN_ILO_PERF_TARGET");
   }
+
+  /**
+   * Validate the COAEP object.
+   * Checks if every ILO has a performance target and pass score of at least 50.
+   *
+   * @param {string[]} validMsgs - Array of valid messages.
+   * @param {DataTableException[]} tableErrors - Array of table errors.
+   * @param {CoaepDT} coaepDT - COAEP DataTable.
+   * @param {COAEP | null} coaepObj - COAEP object.
+   * @returns {Promise<void>} - Promise that resolves when validation is complete.
+   */
 
   async validate(
     validMsgs: string[],
@@ -23,7 +34,7 @@ export class MinPerfTarget extends DTValidator<CoaepDT, COAEP> {
 
     if (!success) {
       localErrors.push({
-        error: "Failed to access table data.",
+        error: "Unable to access COAEP table.",
         from: this.name,
       });
       return;
@@ -53,14 +64,14 @@ export class MinPerfTarget extends DTValidator<CoaepDT, COAEP> {
 
       if (!passScore)
         localErrors.push({
-          error: "Pass score is required.",
+          error: "Passing score is required.",
           row: i,
           column: 6,
           from: this.name,
         });
       else if (passScore < minPassScore) {
         localErrors.push({
-          error: `Pass score must be at least ${minPassScore}.`,
+          error: `Passing score must be at least ${minPassScore}.`,
           row: i,
           column: 6,
           from: this.name,
