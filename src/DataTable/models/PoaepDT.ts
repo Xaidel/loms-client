@@ -92,13 +92,17 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
 
         if (rowIdx <= headerIdx) continue;
 
-        const po = row[poIdx]?.trim() || "";
+        let po = row[poIdx]?.trim() || "";
 
         // If new PO, flush stored values
         if (po) {
           lastSC = "";
           lastAT = "";
           lastPT = "";
+
+          // extract the PO description
+          const [poNum, poDesc] = this.extractPoDesc(po);
+          if (poDesc) po = poDesc;
         }
 
         const tl = (row[tlIdx]?.trim().toLowerCase() as Taxonomy) || null;
@@ -373,5 +377,11 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
 
     if (localErrors.length > 0) tableErrors.push(...localErrors);
     else validMsgs.push(`${this.name} successfully validated all fields.`);
+  }
+
+  extractPoDesc(desc: string): string[] {
+    const regex = /^.*(PO\d+):(.*)$/;
+    const match = regex.exec(desc.trim());
+    return match ? match.slice(1) : ["", desc.trim()];
   }
 }

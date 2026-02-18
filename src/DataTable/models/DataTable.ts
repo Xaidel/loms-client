@@ -11,6 +11,13 @@ export type DataTableInfo<RowType = any[]> = {
   state: Record<string, any>;
 };
 
+/**
+ * An abstract class that wraps a tabular data structure
+ * and provides methods for state management, validation, CSV parsing, and JSON conversion.
+ *
+ * @template Obj - The type of the DataTable JSON output.
+ * @template RowType - The type of each row of the inner table.
+ */
 export abstract class DataTable<Obj, RowType> {
   protected name: string;
   protected headers: string[];
@@ -26,7 +33,7 @@ export abstract class DataTable<Obj, RowType> {
    * @template RowType - The type of each row of the inner table.
    *
    * @param {string} _name - The name of the DataTable. Defaults to "DataTable".
-   * @param {string[]} _headers - The headers of the DataTable.
+   * @param {string[]} _headers - String containing the headers of the DataTable.
    */
   constructor(_name: string = "DataTable", _headers: string[]) {
     this.name = _name;
@@ -229,15 +236,6 @@ export abstract class DataTable<Obj, RowType> {
       }
     }
     return { row, column };
-
-    // for (let i = 0; i < this.table.length; i++) {
-    //   for (let j = 0; j < this.table[i]!.length; j++) {
-    //     if (this.table[i]![j] === str) {
-    //       return { row: i, column: j };
-    //     }
-    //   }
-    // }
-    // return { row: -1, column: -1 };
   }
 
   /**

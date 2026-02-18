@@ -3,6 +3,7 @@ import { CoaepDT } from "../../CoaepDT";
 import DataTableException from "../../../types/DataTableException";
 import { DTValidator } from "../../DTValidator";
 import Taxonomy from "../../../../types/Taxonomy";
+import { CoaepRow } from "../../../types/CoaepDTRow";
 
 const whitelist: Taxonomy[] = [
   "applying",
@@ -53,7 +54,22 @@ export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
       }
 
       if (!whitelist.includes(co.taxonomy_level as Taxonomy)) {
-        const { row, column } = await coaepDT.findValue(co.statement);
+        const table = coaepDT.getTable().data!.table;
+        let row = -1;
+        let column = -1;
+
+        for (let i = 0; row < table.length; row++) {
+          const rowData: CoaepRow = table[i]!;
+          const coArr = rowData[1];
+
+          if (coArr && coArr[3] === co.statement) {
+            row = i;
+            column = 1;
+            break;
+          }
+        }
+
+        // const { row, column } = await coaepDT.findValue(co.statement);
         let tbe = {
           error: `Cannot have CO Taxonomy Level of lower than Applying: ${co.taxonomy_level.toUpperCase()}`,
           from: this.name,
@@ -62,9 +78,8 @@ export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
         if (row !== -1 || column !== -1) {
           tbe["row"] = row;
           tbe["column"] = column;
+          localErrors.push(tbe);
         }
-
-        localErrors.push(tbe);
       }
     }
 
