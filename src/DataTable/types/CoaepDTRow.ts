@@ -9,7 +9,7 @@ export type CoaepDT_No = string | null;
  * Represents the CO statement column in the internal COAEP DataTable.
  */
 export type CoaepDT_CO =
-  | [string | null, string | null, string | null, string | null]
+  | [CoaepDT_CogLvl, CoaepDT_TaxLvl, CoaepDT_Verb, CoaepDT_Rest]
   | null;
 
 export type CoaepDT_CogLvl = "I" | "E" | "D" | null;

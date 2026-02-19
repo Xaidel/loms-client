@@ -40,33 +40,39 @@ export class ILOTaxoOrder extends DTValidator<CoaepDT, COAEP> {
       const co = coaepObj.co[i];
 
       if (!co) {
-        const { row, column } = await coaepDT.findValue(i + 1 + "");
-        localErrors.push({
-          error: `No CO Statement for CO ${i + 1}.`,
-          row,
-          column: column + 1,
-          from: this.name,
+        // const { row, column } = await coaepDT.findValue(i + 1 + "");
+        (await coaepDT.searchTable(i + 1 + "")).map(({ row, column }) => {
+          localErrors.push({
+            error: `No CO Statement for CO ${i + 1}.`,
+            row,
+            column,
+            from: this.name,
+          });
         });
-
         continue;
       }
 
       if (!co?.ilo) {
-        const { row, column } = await coaepDT.findValue(co.statement);
-
-        localErrors.push({
-          error: `No ILOs for CO ${i + 1}.`,
-          row,
-          column,
-          from: this.name,
+        // const { row, column } = await coaepDT.findValue(co.statement);
+        (await coaepDT.searchTable(co.statement)).map(({ row, column }) => {
+          localErrors.push({
+            error: `No ILOs for CO ${i + 1}.`,
+            row,
+            column,
+            from: this.name,
+          });
         });
+
         continue;
       }
 
       const firstIloAt: {
         row: number;
         column: number;
-      } = await coaepDT.findValue(co.ilo[0]!.statement);
+      } = (await coaepDT.searchTable(co.statement))[0] ?? {
+        row: -1,
+        column: -1,
+      };
       const iloOrder = co.ilo.map(
         (ilo) => taxoOrder[ilo.taxonomy_level! as Taxonomy],
       );

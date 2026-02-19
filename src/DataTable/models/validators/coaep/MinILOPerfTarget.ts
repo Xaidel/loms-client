@@ -66,14 +66,14 @@ export class MinILOPerfTarget extends DTValidator<CoaepDT, COAEP> {
         localErrors.push({
           error: "Passing score is required.",
           row: i,
-          column: 6,
+          column: 4,
           from: this.name,
         });
       else if (passScore < minPassScore) {
         localErrors.push({
           error: `Passing score must be at least ${minPassScore}.`,
           row: i,
-          column: 6,
+          column: 4,
           from: this.name,
         });
       }

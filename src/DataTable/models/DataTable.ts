@@ -216,26 +216,37 @@ export abstract class DataTable<Obj, RowType> {
   }
 
   /**
-   * Finds the row and column index of a given string in the DataTable.
+   * Searches for all instances of a provided value in a row of the DataTable.
    *
-   * @param {string} str - The string to search for.
-   * @returns {Promise<{ row: number; column: number }>} - A promise resolving to the indices. Defaults to {row: -1, column: -1} if not found.
+   * @param {RowType} rowData - The row to search in.
+   * @param {any} val - The value to lookup.
+   * @returns {{column: number}[]} - A list of lookup column indices.
    */
-  async findValue(val: string | any): Promise<{ row: number; column: number }> {
-    let [row, column] = [-1, -1];
-    if (!val) return { row, column };
+  abstract searchRow(rowData: RowType, val: any): { column: number }[];
+
+  /**
+   * Searches for all instances of a provided value in the DataTable.
+   *
+   * @param {any} val - The value to lookup.
+   * @returns {Promise<{ row: number; column: number }[]>} - A promise resolving to a list of lookup indices. Defaults to [] if not found.
+   */
+  async searchTable(val: any): Promise<{ row: number; column: number }[]> {
+    await this.assertInitialized().catch(() => {
+      return [];
+    });
+    if (!val) return [];
+
+    const indices: { row: number; column: number }[] = [];
 
     for (let i = 0; i < this.table.length; i++) {
-      const row = this.table[i]! as RowType[];
-      for (let j = 0; j < row.length; j++) {
-        if (typeof val === "string") {
-          if ((row[j] as string) === val) return { row: i, column: j };
-        } else if (row[j] satisfies typeof val) {
-          if (row[j] === val) return { row: i, column: j };
-        }
+      const rowData = this.table[i]! as RowType;
+      const cols = this.searchRow(rowData, val);
+      for (const col of cols) {
+        indices.push({ row: i, column: col.column });
       }
     }
-    return { row, column };
+
+    return indices;
   }
 
   /**

@@ -48,7 +48,7 @@ console.dir(await poaepDT.initializeTable(validCoaepCSV), { depth: null });
 
 // Fetch table Data
 console.log("== Fetch Table Data ===");
-const result1 = poaepDT.getTable();
+// const result1 = poaepDT.getTable();
 // console.dir(result1, { depth: null });
 
 // // Update table data

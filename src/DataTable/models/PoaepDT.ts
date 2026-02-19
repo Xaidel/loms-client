@@ -384,4 +384,34 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
     const match = regex.exec(desc.trim());
     return match ? match.slice(1) : ["", desc.trim()];
   }
+
+  searchRow(rowData: PoaepRow, val: any): { column: number }[] {
+    const cols: { column: number }[] = [];
+
+    // Extract individual fields
+    const [po, tl, pi, fc, sc, at, pt] = rowData!;
+
+    // PO
+    if (po === val) cols.push({ column: 0 });
+
+    // Taxonomy Level
+    if (tl === val) cols.push({ column: 1 });
+
+    // Performance Indicator
+    if (pi === val) cols.push({ column: 2 });
+
+    // Formative Courses
+    if (fc && fc.includes(val)) cols.push({ column: 3 });
+
+    // Skill Category
+    if (sc === val) cols.push({ column: 4 });
+
+    // Assessment Tool
+    if (at === val) cols.push({ column: 5 });
+
+    // Performance Target
+    if (pt && (pt[0] === val || pt[1] === val)) cols.push({ column: 6 });
+
+    return cols;
+  }
 }

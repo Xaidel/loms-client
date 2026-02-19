@@ -409,4 +409,37 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
       from: `${this.name.toUpperCase()}_OBJ_GRAMMAR`,
     } as DataTableException);
   }
+
+  searchRow(rowData: CoaepRow, val: any): { column: number }[] {
+    const cols: { column: number }[] = [];
+
+    // Extract individual fields
+    const [no, co, ilo, assessTool, perfTarget] = rowData!;
+
+    // Number
+    if (no === val) cols.push({ column: 0 });
+
+    // CO
+    if (
+      co &&
+      (co[0] === val || co[1] === val || co[2] === val || co[3] === val)
+    )
+      cols.push({ column: 1 });
+
+    // ILO
+    if (
+      ilo &&
+      (ilo[0] === val || ilo[1] === val || ilo[2] === val || ilo[3] === val)
+    )
+      cols.push({ column: 2 });
+
+    // Assessment Tool
+    if (assessTool === val) cols.push({ column: 3 });
+
+    // Performance Target
+    if (perfTarget && (perfTarget[0] === val || perfTarget[1] === val))
+      cols.push({ column: 4 });
+
+    return cols;
+  }
 }

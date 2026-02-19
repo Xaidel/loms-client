@@ -39,25 +39,41 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
       const co = coaepObj.co[i];
 
       if (!co) {
-        const { row, column } = await coaepDT.findValue(i + 1 + "");
-        localErrors.push({
-          error: `No CO Statement for CO ${i + 1}.`,
-          row,
-          column: column + 1,
-          from: this.name,
+        // const { row, column } = await coaepDT.findValue(i + 1 + "");
+        // localErrors.push({
+        //   error: `No CO Statement for CO ${i + 1}.`,
+        //   row,
+        //   column: column + 1,
+        //   from: this.name,
+        // });
+        (await coaepDT.searchTable(i + 1 + "")).map(({ row, column }) => {
+          localErrors.push({
+            error: `No CO Statement for CO ${i + 1}.`,
+            row,
+            column,
+            from: this.name,
+          });
         });
-
         continue;
       }
 
       if (!co?.ilo) {
-        const { row, column } = await coaepDT.findValue(co.statement);
+        // const { row, column } = await coaepDT.findValue(co.statement);
 
-        localErrors.push({
-          error: `No ILOs for CO ${i + 1}.`,
-          row,
-          column,
-          from: this.name,
+        // localErrors.push({
+        //   error: `No ILOs for CO ${i + 1}.`,
+        //   row,
+        //   column,
+        //   from: this.name,
+        // });
+        // continue;
+        (await coaepDT.searchTable(co.statement)).map(({ row, column }) => {
+          localErrors.push({
+            error: `No ILOs for CO ${i + 1}.`,
+            row,
+            column,
+            from: this.name,
+          });
         });
         continue;
       }
@@ -66,26 +82,49 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
       const lastILO = co.ilo[lastILOIdx];
 
       if (!lastILO!.taxonomy_level) {
-        const { row, column } = await coaepDT.findValue(lastILO!.statement);
+        // const { row, column } = await coaepDT.findValue(lastILO!.statement);
 
-        localErrors.push({
-          error: `Last ILO for CO ${i + 1} has no Taxonomy Level.`,
-          row,
-          column,
-          from: this.name,
-        });
+        // localErrors.push({
+        //   error: `Last ILO for CO ${i + 1} has no Taxonomy Level.`,
+        //   row,
+        //   column,
+        //   from: this.name,
+        // });
+        // continue;
+        (await coaepDT.searchTable(lastILO!.statement)).map(
+          ({ row, column }) => {
+            localErrors.push({
+              error: `Last ILO for CO ${i + 1} has no Taxonomy Level.`,
+              row,
+              column,
+              from: this.name,
+            });
+          },
+        );
         continue;
       }
 
       if (lastILO!.taxonomy_level !== co.taxonomy_level) {
-        const { row, column } = await coaepDT.findValue(lastILO!.statement);
+        // const { row, column } = await coaepDT.findValue(lastILO!.statement);
 
-        localErrors.push({
-          error: `Last ILO for CO ${i + 1} does not match the CO's Taxonomy Level. (${lastILO!.taxonomy_level} !== ${co.taxonomy_level})`,
-          row,
-          column,
-          from: this.name,
-        });
+        // localErrors.push({
+        //   error: `Last ILO for CO ${i + 1} does not match the CO's Taxonomy Level. (${lastILO!.taxonomy_level} !== ${co.taxonomy_level})`,
+        //   row,
+        //   column,
+        //   from: this.name,
+        // });
+        // continue;
+        (await coaepDT.searchTable(lastILO!.statement)).map(
+          ({ row, column }) => {
+            localErrors.push({
+              error: `Last ILO for CO ${i + 1} does not match the CO's Taxonomy Level. (${lastILO!.taxonomy_level?.toUpperCase()} != ${co.taxonomy_level?.toUpperCase()})`,
+              row,
+              column,
+              from: this.name,
+            });
+          },
+        );
+        continue;
       }
     }
 
