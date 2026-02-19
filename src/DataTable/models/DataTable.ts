@@ -44,6 +44,13 @@ export abstract class DataTable<Obj, RowType> {
     this.state = {};
   }
 
+  setDataTable(dataTableInfo: DataTableInfo<RowType>) {
+    this.name = dataTableInfo.name;
+    this.headers = dataTableInfo.headers;
+    this.table = dataTableInfo.table;
+    this.state = dataTableInfo.state;
+  }
+
   /**
    * Returns the name of the DataTable.
    * @returns string

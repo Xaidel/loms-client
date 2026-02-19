@@ -104,7 +104,10 @@ export class LastILOTaxo extends DTValidator<CoaepDT, COAEP> {
         continue;
       }
 
-      if (lastILO!.taxonomy_level !== co.taxonomy_level) {
+      if (
+        lastILO!.taxonomy_level.toLowerCase() !==
+        co.taxonomy_level?.toLowerCase()
+      ) {
         // const { row, column } = await coaepDT.findValue(lastILO!.statement);
 
         // localErrors.push({

@@ -11,6 +11,7 @@ import { MinCOtaxo } from "./validators/coaep/MinCOtaxo";
 import ILOTaxoOrder from "./validators/coaep/ILOTaxoOrder";
 import { CoaepDT_CO, CoaepDT_ILO, CoaepRow } from "../types/CoaepDTRow";
 import { MinILOPerfTarget } from "./validators/coaep/MinILOPerfTarget";
+import { DEFAULT_CO_COG_LEVEL } from "../registry/registry";
 
 export const coaepHeaders = [
   "No.",
@@ -137,7 +138,8 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
           this.state.sy = row[schoolYear + 1]?.trim() || this.state.sy;
         }
         if (courseIdx !== -1) {
-          this.state.course = row[courseIdx + 1]?.trim() || this.state.course;
+          const courseStr = row[courseIdx + 1]?.trim().split(" ")[0] || "";
+          this.state.course = courseStr || this.state.course;
         }
         if (semesterIdx !== -1) {
           const semStr = row[semesterIdx + 1]?.trim() || "";
@@ -172,7 +174,12 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
         if (coState) {
           const { cognitive_level, taxonomy_level, verb, rest } =
             extractFromObjective(coState);
-          coArr = [cognitive_level, taxonomy_level, verb, rest];
+          coArr = [
+            cognitive_level ?? DEFAULT_CO_COG_LEVEL,
+            taxonomy_level,
+            verb,
+            rest,
+          ];
         }
 
         // extract ILO array info if ilo exists

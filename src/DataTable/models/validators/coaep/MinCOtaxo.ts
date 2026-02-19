@@ -53,7 +53,7 @@ export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
         continue;
       }
 
-      if (!whitelist.includes(co.taxonomy_level as Taxonomy)) {
+      if (!whitelist.includes(co.taxonomy_level!.toLowerCase() as Taxonomy)) {
         // const { row, column } = await coaepDT.findValue(co.statement);
         const { row, column } = (await coaepDT.searchTable(co.statement))[0]!;
         if (row) {
