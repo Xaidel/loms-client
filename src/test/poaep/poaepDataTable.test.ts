@@ -48,16 +48,16 @@ console.dir(await poaepDT.initializeTable(validCoaepCSV), { depth: null });
 
 // Fetch table Data
 console.log("== Fetch Table Data ===");
-// const result1 = poaepDT.getTable();
-// console.dir(result1, { depth: null });
+const result1 = poaepDT.getTable();
+console.dir(result1, { depth: null });
 
-// // Update table data
-// console.log("== Update Table Data ===");
-// let table = result1.data!.table;
-// table[0]![3] = "New Assessment tool";
-// await poaepDT.setTable(table);
-// let result2 = await poaepDT.toJson();
-// console.dir(result2!.data!.jsonObj!.co[0]!.ilo[0], { depth: null });
+// Update table data
+console.log("== Update Table Data ===");
+let table = result1.data!.table;
+table[0]![5] = "New Assessment tool";
+await poaepDT.setTable(table);
+let result2 = await poaepDT.toJson();
+console.dir(result2!.data!.jsonObj, { depth: null });
 
 // // validation
 console.log("== Validation ===");
