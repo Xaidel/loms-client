@@ -14,9 +14,9 @@ export interface PerfIndicator {
   pi_desc: string;
   FormativeCourses: PIFormative[];
   SummativeCourse: PISummative;
+  TaxonomyLevel: PITaxonomyLevel | null;
   AssessmentTool: PIAssessmentTool;
   PerformanceTargets: PIPerfTarget;
-  TaxonomyLevel: PITaxonomyLevel | null;
 }
 
 // changes with curri_id
