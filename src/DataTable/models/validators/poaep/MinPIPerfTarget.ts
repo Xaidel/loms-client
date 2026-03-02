@@ -45,7 +45,7 @@ export class MinPIPerfTarget extends DTValidator<PoaepDT, POAEP> {
     for (let i = 0; i < table.length; i++) {
       const po = table[i]!;
 
-      const [perfTarget, passScore] = po[6];
+      const [perfTarget, passScore] = po[5];
 
       if (!perfTarget) {
         localErrors.push({

@@ -19,6 +19,7 @@ import Taxonomy from "../../types/Taxonomy";
 import { performaceTarget } from "../../helper/performaceTarget.helper";
 import { MinPItaxo } from "./validators/poaep/MinPItaxo";
 import { MinPIPerfTarget } from "./validators/poaep/MinPIPerfTarget";
+import extractFromObjective from "../../helper/extractFromObjective.helper";
 
 export const poaepHeaders = [
   "Program Outcome",
@@ -114,6 +115,14 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
 
         const { performance_target, passing_score } = performaceTarget(pt);
 
+        // exctract piArray if it exists
+        let piArr: PoaepDT_PI = null;
+        if (pi) {
+          const { cognitive_level, taxonomy_level, verb, rest } =
+            extractFromObjective(pi);
+          piArr = [taxonomy_level ?? tl, verb, rest];
+        }
+
         // If no FC, break
         if (!fc) break;
 
@@ -123,8 +132,7 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
         // Push row to table
         table.push([
           po,
-          tl,
-          pi,
+          piArr,
           fcList,
           sc,
           at,
@@ -213,12 +221,11 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
           } as DataTableException);
 
         // fetch cell values
-        const tl = row[1] || null;
-        const pi = row[2] || null;
-        const fc = row[3] || null;
-        const sc = row[4] || lastSC;
-        const at = row[5] || lastAT;
-        const pt = row[6] || lastPT;
+        const pi: PoaepDT_PI = row[1] || [null, null, null];
+        const fc = row[2] || null;
+        const sc = row[3] || lastSC;
+        const at = row[4] || lastAT;
+        const pt = row[5] || lastPT;
 
         if (!fc || fc.length === 0) {
           tableErrors.push({
@@ -245,7 +252,7 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
 
         // create PerfIndicator for the row and push to currentPO
         const perfIndicator: PerfIndicator = {
-          pi_desc: pi!,
+          pi_desc: pi[2]!,
           FormativeCourses: fc!.map((course) => ({
             course_id: course!,
             cognitive_level: null,
@@ -253,7 +260,8 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
           SummativeCourse: {
             course_id: sc!,
           },
-          TaxonomyLevel: tl ? { label: tl } : null,
+          Verb: pi[1] ? { label: pi[1] } : null,
+          TaxonomyLevel: pi[0] ? { label: pi[0] } : null,
           AssessmentTool: { at_desc: at! },
           PerformanceTargets: {
             target_percent: pt![0]!,
@@ -330,21 +338,21 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
 
       // extract cell values
       const po: PoaepDT_PO = row[0] || lastPO;
-      const tl: PoaepDT_Taxo = row[1] || null;
-      const pi: PoaepDT_PI = row[2] || null;
-      const fc: PoaepDT_FC[] = row[3] || null;
-      const sc: PoaepDT_SC = row[4] || lastSC;
-      const at: PoaepDT_AT = row[5] || lastAT;
-      const pt: PoaepDT_PT | null = row[6] || lastPT;
+      // const tl: PoaepDT_Taxo = row[1] || null;
+      const pi: PoaepDT_PI = row[1] || null;
+      const fc: PoaepDT_FC[] = row[2] || null;
+      const sc: PoaepDT_SC = row[3] || lastSC;
+      const at: PoaepDT_AT = row[4] || lastAT;
+      const pt: PoaepDT_PT | null = row[5] || lastPT;
 
       // track missing values
+      // if (!tl) missingIdxs.push(1);
       if (!po) missingIdxs.push(0);
-      if (!tl) missingIdxs.push(1);
-      if (!pi) missingIdxs.push(2);
-      if (!fc) missingIdxs.push(3);
-      if (!sc) missingIdxs.push(4);
-      if (!at) missingIdxs.push(5);
-      if (!pt) missingIdxs.push(6);
+      if (!pi) missingIdxs.push(1);
+      if (!fc) missingIdxs.push(2);
+      if (!sc) missingIdxs.push(3);
+      if (!at) missingIdxs.push(4);
+      if (!pt) missingIdxs.push(5);
 
       // report missing values
       if (missingIdxs.length > 0) {
@@ -389,29 +397,63 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
     const cols: { column: number }[] = [];
 
     // Extract individual fields
-    const [po, tl, pi, fc, sc, at, pt] = rowData!;
+    const [po, pi, fc, sc, at, pt] = rowData!;
 
     // PO
     if (po === val) cols.push({ column: 0 });
 
-    // Taxonomy Level
-    if (tl === val) cols.push({ column: 1 });
-
     // Performance Indicator
-    if (pi === val) cols.push({ column: 2 });
+    if (
+      pi &&
+      (pi[0] === val || pi[1] === val || (pi[2] && pi[2].includes(val)))
+    )
+      cols.push({ column: 1 });
 
     // Formative Courses
-    if (fc && fc.includes(val)) cols.push({ column: 3 });
+    if (fc && fc.includes(val)) cols.push({ column: 2 });
 
     // Skill Category
-    if (sc === val) cols.push({ column: 4 });
+    if (sc === val) cols.push({ column: 3 });
 
     // Assessment Tool
-    if (at === val) cols.push({ column: 5 });
+    if (at === val) cols.push({ column: 4 });
 
     // Performance Target
-    if (pt && (pt[0] === val || pt[1] === val)) cols.push({ column: 6 });
+    if (pt && (pt[0] === val || pt[1] === val)) cols.push({ column: 5 });
 
     return cols;
+  }
+
+  validateObjectiveGrammar(
+    piArr: PoaepDT_PI,
+    row: number,
+    column: number,
+    tableErrors: DataTableException[],
+  ): void {
+    if (!piArr) {
+      tableErrors.push({
+        error: "Cannot find objective statement.",
+        row,
+        column,
+        from: `${this.name.toUpperCase()}_OBJ_GRAMMAR`,
+      });
+      return;
+    }
+
+    const [taxonomy_level, verb, rest] = piArr!;
+
+    const missingFields = [];
+    if (!taxonomy_level) missingFields.push("Taxonomy Level");
+    if (!verb) missingFields.push("Verb");
+    if (!rest) missingFields.push("Performance Indicator");
+
+    if (!missingFields.length) return;
+
+    tableErrors.push({
+      error: `Cannot find fields: ${missingFields.join(", ")}.`,
+      row,
+      column,
+      from: `${this.name.toUpperCase()}_OBJ_GRAMMAR`,
+    } as DataTableException);
   }
 }

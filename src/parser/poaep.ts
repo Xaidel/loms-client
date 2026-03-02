@@ -3,6 +3,8 @@ import { PO, PerfIndicator } from "../types/poaep";
 import { performaceTarget } from "../helper/performaceTarget.helper";
 import getPoaepHeader from "../helper/header-getter/getPoaepHeader";
 import parseFormativeCourses from "../helper/parseFormativeCourses.helper";
+import Taxonomy from "../types/Taxonomy";
+import extractFromObjective from "../helper/extractFromObjective.helper";
 
 const parsePOAEP = (csvString: string) => {
   try {
@@ -59,6 +61,8 @@ const parsePOAEP = (csvString: string) => {
       if (pi === "") break;
       // end loop if pi column is empty
 
+      const { taxonomy_level, verb, rest } = extractFromObjective(pi);
+
       const fc = row[fcIdx]?.trim() || "";
       if (fc === "") throw new Error(`Empty Formative Courses at row ${i}.`);
 
@@ -74,9 +78,10 @@ const parsePOAEP = (csvString: string) => {
       if (pt === "") throw new Error(`Empty Performance Target at row ${i}.`);
       lastPT = pt;
 
-      // * Taxonomy Level not implemented for now
-      // const tl = row[tlIdx]?.trim() || "";
-      // if (tl === "") throw new Error(`Empty Taxonomy Level at row ${i}.`);
+      const tl = taxonomy_level || (row[tlIdx]?.trim() as Taxonomy) || "";
+      if (tl === null) throw new Error(`Empty Taxonomy Level at row ${i}.`);
+
+      const v = verb || null;
 
       // parse FormativeCourses
       const fcArr = parseFormativeCourses(fc);
@@ -97,7 +102,8 @@ const parsePOAEP = (csvString: string) => {
           cognitive_level: 0,
         })),
         SummativeCourse: { course_id: sc },
-        TaxonomyLevel: null,
+        Verb: v ? { label: v } : null,
+        TaxonomyLevel: { label: tl },
         AssessmentTool: { at_desc: at },
         PerformanceTargets: {
           target_percent: ptArr.performance_target,
