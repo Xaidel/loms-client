@@ -8,6 +8,12 @@ import { uploadDeptFaculty } from "./relay/uploadDeptFaculty";
 import { uploadPOAEP } from "./relay/uploadPOAEP";
 import { CoaepDT } from "./DataTable/models/CoaepDT";
 import { PoaepDT } from "./DataTable/models/PoaepDT";
+import { parseAssessmentDataToJson } from "./payloads/parseAssessmentDataToJson";
+import { parseClassListToJson } from "./payloads/parseClassListToJson";
+import { parseCourseOfferingToJson } from "./payloads/parseCourseOfferingToJson";
+import { parseCurriculumToJson } from "./payloads/parseCurriculumToJson";
+import { parseDeptFacultyToJson } from "./payloads/parseDeptFacultyToJson";
+import { parseEnrolledStudentsToJson } from "./payloads/parseEnrolledStudentToJson";
 
 export default class Client {
   private BASE_URL: string;
@@ -90,6 +96,16 @@ export default class Client {
        */
       CoaepDT,
       PoaepDT,
+
+      /**
+       * Parsing Functions that return payload instead of calling the backend
+       */
+      parseAssessmentDataToJson,
+      parseClassListToJson,
+      parseCourseOfferingToJson,
+      parseCurriculumToJson,
+      parseDeptFacultyToJson,
+      parseEnrolledStudentsToJson,
     };
   }
 }
