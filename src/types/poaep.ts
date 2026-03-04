@@ -14,6 +14,7 @@ export interface PerfIndicator {
   pi_desc: string;
   FormativeCourses: PIFormative[];
   SummativeCourse: PISummative;
+  Verb: PIVerb | null;
   TaxonomyLevel: PITaxonomyLevel | null;
   AssessmentTool: PIAssessmentTool;
   PerformanceTargets: PIPerfTarget;
@@ -28,6 +29,10 @@ export interface PIFormative {
 
 export interface PISummative {
   course_id: string;
+}
+
+export interface PIVerb {
+  label: string;
 }
 
 export interface PIAssessmentTool {

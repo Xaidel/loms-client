@@ -53,7 +53,7 @@ console.dir(result1, { depth: null });
 // Update table data
 console.log("== Update Table Data ===");
 let table = result1.data!.table;
-table[0]![5] = "New Assessment tool";
+table[0]![4] = "New Assessment tool";
 await poaepDT.setTable(table);
 let result2 = await poaepDT.toJson();
 console.dir(result2!.data!.jsonObj, { depth: null });

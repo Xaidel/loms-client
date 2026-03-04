@@ -47,7 +47,7 @@ export class MinPItaxo extends DTValidator<PoaepDT, POAEP> {
 
     for (let i = 0; i < table.length; i++) {
       const po = table[i]!;
-      const taxo = po[1]?.toLowerCase() as Taxonomy | null;
+      const taxo = po[1]?.[0] as Taxonomy | null;
 
       if (!taxo) continue;
 
