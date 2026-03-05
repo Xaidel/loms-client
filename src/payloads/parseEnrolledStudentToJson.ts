@@ -3,6 +3,7 @@ import { ParserResult } from "../DataTable/types/ParserResult";
 
 /**
  * Parses the enrolled students from an Excel file and returns a FormData object of the excel file wrapped in a ParserResult.
+ *
  * @param xls - The Enrolled Students Template Excel file to parse
  * @returns ParserResult<{ body: FormData }>
  */
