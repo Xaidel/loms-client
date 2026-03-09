@@ -74,7 +74,7 @@ export const attributeMapping = (row: deptFacultyCsvRow) => {
   };
 };
 
-export function parseDeptFaculty(csvData: string) {
+export const parseDeptFaculty = (csvData: string) => {
   const parsed = Papa.parse<deptFacultyCsvRow>(csvData, {
     header: true,
     skipEmptyLines: true,
@@ -96,4 +96,4 @@ export function parseDeptFaculty(csvData: string) {
     deptFaculties,
     users,
   };
-}
+};

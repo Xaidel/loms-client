@@ -1,33 +1,38 @@
 import { convertToCSVFile } from "../parser/xls";
 import { ParserResult } from "../DataTable/types/ParserResult";
+import {
+  enrolledStudentsCsvRow,
+  parseEnrolledStudents,
+} from "../parser/enrolledstudents";
 
 /**
  * Parses the enrolled students from an Excel file and returns a FormData object of the excel file wrapped in a ParserResult.
  *
  * @param xls - The Enrolled Students Template Excel file to parse
- * @returns ParserResult<{ body: FormData }>
+ * @returns ParserResult<{enrolledStudents: enrolledStudentsCsvRow[]}>
  */
 export const parseEnrolledStudentsToJson = async (
   xls: File,
-): Promise<ParserResult<{ body: FormData }>> => {
+): Promise<ParserResult<{ enrolledStudents: enrolledStudentsCsvRow[] }>> => {
   try {
     const csv = await convertToCSVFile(xls);
-    const formData = new FormData();
-    formData.append("csvFile", csv);
+    const data = await csv.text();
+    const parsedData = parseEnrolledStudents(data);
 
-    const result: ParserResult<{ body: FormData }> = {
-      success: true,
-      message: "Successfully parsed Enrolled Students.",
-      data: {
-        body: formData,
-      },
-    };
+    const result: ParserResult<{ enrolledStudents: enrolledStudentsCsvRow[] }> =
+      {
+        success: true,
+        message: "Successfully parsed Enrolled Students.",
+        data: {
+          enrolledStudents: parsedData.enrolledStudents,
+        },
+      };
     return Promise.resolve(result);
   } catch (error) {
     return Promise.reject({
       success: false,
       message: "Error parsing Enrolled Students.",
       error,
-    } as ParserResult<{ body: FormData }>);
+    } as ParserResult<{ enrolledStudents: enrolledStudentsCsvRow[] }>);
   }
 };
