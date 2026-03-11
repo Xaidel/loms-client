@@ -24,7 +24,7 @@ export function parseCourseOffering(csvData: string): CourseOffering[] {
 
       // Look for semester and school year pattern like "Second Sem S/Y 2024-2025"
       const semesterMatch = cellContent.match(
-        /(First|Second)\s+Sem\s+S\/Y\s+(\d{4}-\d{4})/i
+        /(First|Second)\s+Sem\s+S\/Y\s+(\d{4}-\d{4})/i,
       );
       if (semesterMatch) {
         // Convert semester to number: First = "1", Second = "2"
@@ -33,7 +33,7 @@ export function parseCourseOffering(csvData: string): CourseOffering[] {
         // Convert school year format: "2024-2025" -> "2425"
         if (semesterMatch[2]) {
           const yearMatch = semesterMatch[2].match(
-            /(\d{2})(\d{2})-(\d{2})(\d{2})/
+            /(\d{2})(\d{2})-(\d{2})(\d{2})/,
           );
           if (yearMatch && yearMatch[2] && yearMatch[4]) {
             school_year = yearMatch[2] + yearMatch[4]; // Extract last 2 digits of each year

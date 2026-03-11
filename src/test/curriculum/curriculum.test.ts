@@ -5,9 +5,6 @@ import * as path from "path";
 import * as XLSX from "xlsx";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { convertToCSVFile } from "../../parser/xls";
-import { parseCurriculum } from "../../parser/curriculum";
-import Papa from "papaparse";
 import { parseCurriculumToJson } from "../../payloads/parseCurriculumToJson";
 
 const __filename = fileURLToPath(import.meta.url);
