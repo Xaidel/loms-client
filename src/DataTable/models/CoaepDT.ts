@@ -12,6 +12,7 @@ import ILOTaxoOrder from "./validators/coaep/ILOTaxoOrder";
 import { CoaepDT_CO, CoaepDT_ILO, CoaepRow } from "../types/CoaepDTRow";
 import { MinILOPerfTarget } from "./validators/coaep/MinILOPerfTarget";
 import { DEFAULT_CO_COG_LEVEL } from "../registry/registry";
+import { ILOCount } from "./validators/coaep/ILOCount";
 
 export const coaepHeaders = [
   "No.",
@@ -50,6 +51,9 @@ export class CoaepDT extends DataTable<COAEP, CoaepRow> {
 
     // The PerformanceTarget and PassingScore must not go below 50
     this.useValidator(new MinILOPerfTarget());
+
+    // Enforce ILO constraints (between 1 and 3 for each CO)
+    this.useValidator(new ILOCount());
   }
 
   async validateFields(

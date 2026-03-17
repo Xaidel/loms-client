@@ -33,7 +33,7 @@ export class MinILOPerfTarget extends DTValidator<CoaepDT, COAEP> {
     const localErrors: DataTableException[] = [];
 
     if (!success) {
-      localErrors.push({
+      tableErrors.push({
         error: "Unable to access COAEP table.",
         from: this.name,
       });
