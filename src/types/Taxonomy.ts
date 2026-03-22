@@ -16,4 +16,13 @@ export const taxoOrder: Record<Taxonomy, number> = {
   creating: 6,
 } as const;
 
+export const Taxonomies: Taxonomy[] = [
+  "remembering",
+  "understanding",
+  "applying",
+  "analyzing",
+  "evaluating",
+  "creating",
+] as const;
+
 export default Taxonomy;

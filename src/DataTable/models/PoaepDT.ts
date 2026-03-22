@@ -15,7 +15,7 @@ import {
   PoaepDT_Taxo,
   PoaepRow,
 } from "../types/PoaepDTRow";
-import Taxonomy from "../../types/Taxonomy";
+import Taxonomy, { Taxonomies } from "../../types/Taxonomy";
 import { performaceTarget } from "../../helper/performaceTarget.helper";
 import { MinPItaxo } from "./validators/poaep/MinPItaxo";
 import { MinPIPerfTarget } from "./validators/poaep/MinPIPerfTarget";
@@ -106,7 +106,11 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
           if (poDesc) po = poDesc;
         }
 
-        const tl = (row[tlIdx]?.trim().toLowerCase() as Taxonomy) || null;
+        const tlParse = row[tlIdx]?.trim().toLowerCase() || null;
+        let tl: PoaepDT_Taxo = null;
+        if (tlParse && Taxonomies.includes(tlParse as Taxonomy))
+          tl = tlParse as Taxonomy;
+
         const pi = row[piIdx]?.trim() || "";
         const fc = row[fcIdx]?.trim() || "";
         const sc = row[scIdx]?.trim() || lastSC;
@@ -375,6 +379,9 @@ export class PoaepDT extends DataTable<POAEP, PoaepRow> {
           from: `${this.name.toUpperCase()}_VALIDATE_FIELDS`,
         });
       }
+
+      // validate objectives
+      this.validateObjectiveGrammar(pi, i, 1, localErrors);
 
       // track last values for mergeable fields
       lastPO = po;

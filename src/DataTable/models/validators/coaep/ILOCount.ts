@@ -71,7 +71,6 @@ export class ILOCount extends DTValidator<CoaepDT, COAEP> {
 
       // increment iloAcc if ilo exists
       if (ilo) iloAcc++;
-      console.log("iloAcc: ", iloAcc);
     }
 
     // check again if last iloAcc is between MIN_ILO_COUNT and MAX_ILO_COUNT

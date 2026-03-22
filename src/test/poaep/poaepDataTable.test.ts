@@ -10,7 +10,7 @@ import { PoaepDT } from "../../DataTable/models/PoaepDT";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const sampleFilePath = path.join(__dirname, "test_file.local.xlsx");
+const sampleFilePath = path.join(__dirname, "test_file3.local.xlsx");
 
 let validCoaepCSV = "";
 
@@ -47,21 +47,21 @@ console.dir(await poaepDT.initializeTable(validCoaepCSV), { depth: null });
 
 // Fetch table Data
 console.log("== Fetch Table Data ===");
-const result1 = poaepDT.getTable();
-console.dir(result1, { depth: null });
+// const result1 = poaepDT.getTable();
+// console.dir(result1, { depth: null });
 
-// Update table data
-console.log("== Update Table Data ===");
-let table = result1.data!.table;
-table[0]![4] = "New Assessment tool";
-await poaepDT.setTable(table);
-let result2 = await poaepDT.toJson();
-console.dir(result2!.data!.jsonObj, { depth: null });
+// // Update table data
+// console.log("== Update Table Data ===");
+// let table = result1.data!.table;
+// table[0]![4] = "New Assessment tool";
+// await poaepDT.setTable(table);
+// let result2 = await poaepDT.toJson();
+// console.dir(result2!.data!.jsonObj, { depth: null });
 
-// // validation
-console.log("== Validation ===");
-const result3 = await poaepDT.validate();
-console.dir(result3, { depth: null });
+// // // validation
+// console.log("== Validation ===");
+// const result3 = await poaepDT.validate();
+// console.dir(result3, { depth: null });
 
 // // Convert to JSON
 console.log("== Convert to JSON ===");

@@ -12,7 +12,7 @@ import Papa from "papaparse";
  */
 
 // Load the actual sample POAEP Excel file and convert to CSV
-const sampleFilePath = path.join(__dirname, "test_file.local.xlsx");
+const sampleFilePath = path.join(__dirname, "test_file3.local.xlsx");
 let validPoaepCSV = "";
 
 if (fs.existsSync(sampleFilePath)) {
@@ -88,7 +88,7 @@ if (typeof result5 === "string") {
     if (parsed.data && parsed.data.length > 0) {
       console.log(
         "✓ Sample data row:",
-        parsed.data[parsed.indexes?.headerRowIndex + 1]
+        parsed.data[parsed.indexes?.headerRowIndex + 1],
       );
     }
   } catch (e) {

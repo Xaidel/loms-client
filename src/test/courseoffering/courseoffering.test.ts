@@ -45,6 +45,9 @@ console.log("=== Test: Course Offering Parser ===");
 // Parse the CSV data using the Course Offering parser
 const result = parseCourseOffering(validCourseOfferingCSV);
 // Display the result with full depth using console.dir
-console.dir({ result }, { depth: null });
+
+for (let i = 0; i < result.length; i++) {
+  console.log(`Row ${i + 1}:`, result[i]);
+}
 
 console.log("=== Test Complete ===");
