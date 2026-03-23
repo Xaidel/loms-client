@@ -59,13 +59,13 @@ console.log("== Fetch Table Data ===");
 // console.dir(result2!.data!.jsonObj, { depth: null });
 
 // // // validation
-// console.log("== Validation ===");
-// const result3 = await poaepDT.validate();
-// console.dir(result3, { depth: null });
+console.log("== Validation ===");
+const result3 = await poaepDT.validate();
+console.dir(result3, { depth: null });
 
-// // Convert to JSON
-console.log("== Convert to JSON ===");
-const result4 = await poaepDT.toJson();
-console.dir(result4, { depth: null });
+// // // Convert to JSON
+// console.log("== Convert to JSON ===");
+// const result4 = await poaepDT.toJson();
+// console.dir(result4, { depth: null });
 
 console.log("=== All Tests Complete ===");

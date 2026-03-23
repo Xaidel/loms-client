@@ -12,6 +12,8 @@ const whitelist: Taxonomy[] = [
   "creating",
 ];
 
+const blacklist: Taxonomy[] = ["remembering", "understanding"];
+
 export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
   constructor() {
     super("MIN_CO_TAXO");
@@ -45,7 +47,10 @@ export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
 
     for (let i = 0; i < coaepObj.co.length; i++) {
       const co = coaepObj.co[i]!;
-      if (!co.taxonomy_level) {
+
+      const taxo = co.taxonomy_level?.trim()?.toLowerCase() as Taxonomy;
+
+      if (!taxo) {
         localErrors.push({
           error: `No taxonomy level for CO ${i + 1}`,
           from: this.name,
@@ -53,12 +58,23 @@ export class MinCOtaxo extends DTValidator<CoaepDT, COAEP> {
         continue;
       }
 
-      if (!whitelist.includes(co.taxonomy_level!.toLowerCase() as Taxonomy)) {
-        // const { row, column } = await coaepDT.findValue(co.statement);
+      if (blacklist.includes(taxo)) {
         const { row, column } = (await coaepDT.searchTable(co.statement))[0]!;
         if (row) {
           localErrors.push({
-            error: `Cannot have CO Taxonomy Level of lower than APPLYING: ${co.taxonomy_level.toUpperCase()}`,
+            error: `Cannot have CO Taxonomy Level of lower than APPLYING: ${taxo.toUpperCase()}`,
+            row,
+            column,
+            from: this.name,
+          });
+        }
+      }
+
+      if (!whitelist.includes(taxo)) {
+        const { row, column } = (await coaepDT.searchTable(co.statement))[0]!;
+        if (row) {
+          localErrors.push({
+            error: `Invalid Taxonomy Level: ${taxo.toUpperCase()}`,
             row,
             column,
             from: this.name,

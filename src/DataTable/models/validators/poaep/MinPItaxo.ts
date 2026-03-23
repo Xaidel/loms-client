@@ -11,6 +11,8 @@ const whitelist: Taxonomy[] = [
   "creating",
 ];
 
+const blacklist: Taxonomy[] = ["remembering", "understanding"];
+
 export class MinPItaxo extends DTValidator<PoaepDT, POAEP> {
   constructor() {
     super("MIN_PI_TAXO");
@@ -47,13 +49,23 @@ export class MinPItaxo extends DTValidator<PoaepDT, POAEP> {
 
     for (let i = 0; i < table.length; i++) {
       const po = table[i]!;
-      const taxo = po[1]?.[0] as Taxonomy | null;
+      const taxo = po[1]?.[0]?.trim()?.toLowerCase() as Taxonomy | null;
 
       if (!taxo) continue;
 
+      if (blacklist.includes(taxo)) {
+        localErrors.push({
+          error: `Cannot have PO Taxonomy Level of Remembering or Understanding: ${taxo.toUpperCase()}`,
+          row: i,
+          column: 1,
+          from: this.name,
+        });
+        continue;
+      }
+
       if (!whitelist.includes(taxo)) {
         localErrors.push({
-          error: `Cannot have PO Taxonomy Level of lower than Applying: ${taxo.toUpperCase()}`,
+          error: `Invalid Taxonomy Level: ${taxo.toUpperCase()}`,
           row: i,
           column: 1,
           from: this.name,
